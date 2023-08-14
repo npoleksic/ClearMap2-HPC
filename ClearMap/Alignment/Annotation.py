@@ -62,7 +62,7 @@ def decompress_atlases(atlas_base_name):
     atlas_component_names = ('annotation', 'hemispheres', 'reference', 'distance_to_surface')
     for atlas_type in atlas_component_names:
         f_path = os.path.join(settings.atlas_folder, f'{atlas_base_name}_{atlas_type}.tif')
-        fu.uncompress(f_path, extension='auto')
+        fu.uncompress(f_path, extension='zip')
         paths.append(f_path)
     return paths
 
