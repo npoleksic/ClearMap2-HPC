@@ -21,6 +21,7 @@ dependencies:
   - python=3.9  # constraining seems to speed up resolution
   - pip
   - ipython
+  - ipykernel
   - vispy
   # - pyopengl
   # - pyqt<6
@@ -32,7 +33,7 @@ dependencies:
   - scipy
   - pandas<2  # Groupby syntax changes
   - pyarrow
-  - matplotlib
+  # - matplotlib
   - scikit-image
   - scikit-learn
   - graph-tool<=2.45  # Cannot remove self loops with later versions
@@ -43,11 +44,11 @@ dependencies:
   - tifffile<2020.9.22  # Adds "Use DimensionOrder to determine axes order in OmeXml." which breaks ClearMap.IO
   - xmltodict  # to compensate for old tifffile
   - pygments
-  - qdarkstyle
-  - qtpy  # for qdarkstyle
+  # - qdarkstyle
+  # - qtpy  # for qdarkstyle
   - psutil  # required for python < 3.9 for cancelable ProcessPoolExecutors
   - tqdm
-  - mpld3  # WARNING Maybe pip
+  # - mpld3  # WARNING Maybe pip
 #  - pip:
 #    - lxml
 variables:

@@ -38,14 +38,14 @@ if __name__ == "__main__":
   
   #%% Initialize workspace
   import sys
-  sys.path.append('/home/npoleksic/ClearMap2') # CONFIGURE
+  sys.path.append('/home/npoleksic/ClearMap2-HPC') # CONFIGURE PATH TO CLEARMAP
   from ClearMap.Environment import *  #analysis:ignore
   
     
   #directories and files
-  directory = '/home/npoleksic/LSS/ncb-core/users/npoleksic/sarah_data_new' # CONFIGURE
-  expression_raw      = 'cfos/16-09-36_TR1 640_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # CONFIGURE
-  expression_auto     = 'autof/15-12-07_TR1 autofluo_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # CONFIGURE
+  directory = '/home/npoleksic/LSS/ncb-core/users/npoleksic/sarah_data_new_hpc' # CONFIGURE DATA DIRECTORY PATH
+  expression_raw      = 'cfos/16-09-36_TR1 640_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # CONFIGURE RAW DATA PATH FROM DIRECTORY
+  expression_auto     = 'autof/15-12-07_TR1 autofluo_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # CONFIGURE AUTOF DATA PATH FROM DIRECTORY
   
   ws = wsp.Workspace('CellMap', directory=directory);
   ws.update(raw=expression_raw, autofluorescence=expression_auto)
@@ -58,7 +58,7 @@ if __name__ == "__main__":
   #%% Initialize alignment 
   
   #init atals and reference files
-  annotation_file, reference_file, distance_file=ano.prepare_annotation_files( # CONFIGURE
+  annotation_file, reference_file, distance_file=ano.prepare_annotation_files( # CONFIGURE ATLAS ORIENTATION TO MATCH DATA
       slicing=(slice(None),slice(None),slice(0,326)), orientation=(3,1,2),
       overwrite=False, verbose=True);
   
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         
   #%% Resample 
              
-  resample_parameter = { # CONFIGURE
+  resample_parameter = { # CONFIGURE RESUOLUTION OF RAW DATA
       "source_resolution" : (3.77556,3.77556,3),
       "sink_resolution"   : (25,25,25),
       "processes" : 4,
@@ -102,7 +102,7 @@ if __name__ == "__main__":
   
   #%% Resample autofluorescence
       
-  resample_parameter_auto = { # CONFIGURE
+  resample_parameter_auto = { # CONFIGURE RESOLUTION OF AUTOF DATA
       "source_resolution" : (3.77556,3.77556,3),
       "sink_resolution"   : (25,25,25),
       "processes" : 4,
