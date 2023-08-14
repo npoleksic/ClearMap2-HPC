@@ -71,7 +71,7 @@ if __name__ == "__main__":
   ### Data conversion
   ############################################################################### 
   
-  #%% Convert raw data to npy file     
+  #%% Convet raw data to npy file     
                
   source = ws.source('raw');
   sink   = ws.filename('stitched')
