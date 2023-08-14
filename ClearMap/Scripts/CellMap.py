@@ -67,7 +67,6 @@ if __name__ == "__main__":
   align_reference_affine_file  = io.join(resources_directory, 'Alignment/align_affine.txt')
   align_reference_bspline_file = io.join(resources_directory, 'Alignment/align_bspline.txt')
   
-  
   #%%############################################################################
   ### Data conversion
   ############################################################################### 
@@ -78,7 +77,6 @@ if __name__ == "__main__":
   sink   = ws.filename('stitched')
   io.delete_file(sink)
   io.convert(source, sink, processes=None, verbose=True);
-  
   
   #%%############################################################################
   ### Resampling and atlas alignment 
@@ -96,10 +94,7 @@ if __name__ == "__main__":
   io.delete_file(ws.filename('resampled'))
   
   res.resample(ws.filename('stitched'), sink=ws.filename('resampled'), **resample_parameter)
-  
-  #%%
-  # p3d.plot(ws.filename('resampled'))
-  
+
   #%% Resample autofluorescence
       
   resample_parameter_auto = { # CONFIGURE RESOLUTION OF AUTOF DATA
@@ -110,10 +105,8 @@ if __name__ == "__main__":
       };    
   
   res.resample(ws.filename('autofluorescence'), sink=ws.filename('resampled', postfix='autofluorescence'), **resample_parameter_auto)
-  
-  #p3d.plot([ws.filename('resampled'), ws.filename('resampled', postfix='autofluorescence')])
-  
-  #%% Aignment - resampled to autofluorescence
+    
+  #%% Alignment - resampled to autofluorescence
   
   # align the two channels
   align_channels_parameter = {            
@@ -147,7 +140,6 @@ if __name__ == "__main__":
       };
   
   elx.align(**align_reference_parameter);
-  
   
   #%%############################################################################
   ### Create test data
@@ -247,8 +239,6 @@ if __name__ == "__main__":
   
   io.write(ws.filename('cells'), cells_data)
   
-  
-  
   #%%############################################################################
   ### Cell csv generation for external analysis
   ###############################################################################
@@ -272,7 +262,6 @@ if __name__ == "__main__":
     data = np.array([source[name] if name in source.dtype.names else np.full(source.shape[0], np.nan) for name in names]);
     io.write(sink, data);
   
-  
   #%%############################################################################
   ### Voxelization - cell density
   ###############################################################################
@@ -295,13 +284,7 @@ if __name__ == "__main__":
         verbose = True
       )
   
-  vox.voxelize(coordinates, sink=ws.filename('density', postfix='counts'), **voxelization_parameter);
-  
-  
-  #%% 
-  
-  # p3d.plot(ws.filename('density', postfix='counts'))
-  
+  vox.voxelize(coordinates, sink=ws.filename('density', postfix='counts'), **voxelization_parameter);  
   
   #%% Weighted 
   
@@ -317,7 +300,3 @@ if __name__ == "__main__":
       )
   
   vox.voxelize(coordinates, sink=ws.filename('density', postfix='intensities'), **voxelization_parameter);
-  
-  #%%
-  
-  # p3d.plot(ws.filename('density', postfix='intensities'))
