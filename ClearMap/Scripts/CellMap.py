@@ -87,7 +87,7 @@ if __name__ == "__main__":
   resample_parameter = { # CONFIGURE RESUOLUTION OF RAW DATA
       "source_resolution" : (3.77556,3.77556,3),
       "sink_resolution"   : (25,25,25),
-      "processes" : 4,
+      "processes" : 6,
       "verbose" : True,             
       };
   
@@ -100,7 +100,7 @@ if __name__ == "__main__":
   resample_parameter_auto = { # CONFIGURE RESOLUTION OF AUTOF DATA
       "source_resolution" : (3.77556,3.77556,3),
       "sink_resolution"   : (25,25,25),
-      "processes" : 4,
+      "processes" : 6,
       "verbose" : True,                
       };    
   
@@ -118,7 +118,7 @@ if __name__ == "__main__":
       "affine_parameter_file"  : align_channels_affine_file,
       "bspline_parameter_file" : None,
       
-      #directory of the alig'/home/nicolas.renier/Documents/ClearMap_Ressources/Par0000affine.txt',nment result
+      #directory of the alignment result
       "result_directory" :  ws.filename('resampled_to_auto')
       }; 
   

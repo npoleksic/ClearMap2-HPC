@@ -38,7 +38,6 @@ if __name__ == "__main__":
     sys.path.append(system_path) # CONFIGURE PATH TO CLEARMAP
     from ClearMap.Environment import *  #analysis:ignore
   
-  
     ws = wsp.Workspace('CellMap', directory=directory);
     ws.update(raw=expression_raw, autofluorescence=expression_auto)
     ws.info()
@@ -132,17 +131,6 @@ if __name__ == "__main__":
         };
   
     elx.align(**align_reference_parameter);
-
-    #%%############################################################################
-    ### Create test data
-    ###############################################################################
-
-    #%% Crop test data 
-
-    #select sublice for testing the pipeline
-    # slicing = (slice(100,400),slice(1300,1600),slice(1150,1300));
-    # ws.create_debug('stitched', slicing=slicing);
-    # ws.debug = True;   
 
     #%%############################################################################
     ### Cell detection

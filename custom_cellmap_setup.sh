@@ -10,7 +10,12 @@ echo -e "\nTo run a basic CellMap pipeline, exit this script and run ./run_cellm
 
 echo "The script will perform the following processes:"
 echo -e "\t - Create and activate a CellMap-specific conda environment"
-echo -e "\t - Install a python kernel that allows the user to manually run CellMap"
+echo -e "\t - Install a python kernel that allows the user to manually run CellMap\n"
+
+echo "Helpful links:"
+echo -e "\t - ClearMap2 Source Code - github.com/ChristophKirst/ClearMap2/"
+echo -e "\t - ClearMap2 Documentation - christophkirst.github.io/ClearMap2Documentation/"
+echo -e "\t - ClearMap Tutorial [VIDEO] - https://youtu.be/-WehURPyIa8"
 
 read -r -p "Would you like to proceed? ([y]/n): " response
 if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]
@@ -79,4 +84,4 @@ echo -e "\t - Right click inside the file and select \"Create Console for Editor
 echo -e "\t - In the \"Select Kernel\" dropdown menu, select \"ClearMapHPC\""
 echo -e "\t\t - This should open a console tab where you can view outputs"
 echo -e "\t - Highlight desired code within CellMap.py"
-echo -e "\t - Press [Shift]+[Enter]"
+echo -e "\t - Press [Shift]+[Enter]\n"
