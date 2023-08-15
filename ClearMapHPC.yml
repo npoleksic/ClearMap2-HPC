@@ -21,7 +21,6 @@ dependencies:
   - python=3.9  # constraining seems to speed up resolution
   - pip
   - ipython
-  - ipykernel
   - vispy
   # - pyopengl
   # - pyqt<6
