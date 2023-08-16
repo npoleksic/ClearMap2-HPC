@@ -67,7 +67,7 @@ if __name__ == "__main__":
     source = ws.source('raw');
     sink   = ws.filename('stitched')
     io.delete_file(sink)
-    io.convert(source, sink, processes=None, verbose=True);
+    io.convert(source, sink, processes=16, verbose=True);
   
     #%%############################################################################
     ### Resampling and atlas alignment 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     resample_parameter = { # CONFIGURE RESUOLUTION OF RAW DATA
         "source_resolution" : (3.77556,3.77556,3),
         "sink_resolution"   : (25,25,25),
-        "processes" : 4,
+        "processes" : 16,
         "verbose" : True,             
         };
   
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     resample_parameter_auto = { # CONFIGURE RESOLUTION OF AUTOF DATA
         "source_resolution" : (3.77556,3.77556,3),
         "sink_resolution"   : (25,25,25),
-        "processes" : 4,
+        "processes" : 16,
         "verbose" : True,                
         };    
   
@@ -102,6 +102,7 @@ if __name__ == "__main__":
     # align the two channels
     align_channels_parameter = {            
         #moving and reference images
+        "processes" : 16,
         "moving_image" : ws.filename('resampled', postfix='autofluorescence'),
         "fixed_image"  : ws.filename('resampled'),
       
@@ -120,6 +121,7 @@ if __name__ == "__main__":
     # align autofluorescence to reference
     align_reference_parameter = {            
         #moving and reference images
+        "processes" : 16,        
         "moving_image" : reference_file,
         "fixed_image"  : ws.filename('resampled', postfix='autofluorescence'),
       
@@ -213,9 +215,11 @@ if __name__ == "__main__":
     coordinates_transformed.dtype=[(t,float) for t in ('xt','yt','zt')]
     label = np.array(label, dtype=[('order', int)]);
     names = np.array(names, dtype=[('name', 'U256')])
-  
+    ID = np.array(ID, dtype=[('id', int)])
+    acronym = np.array(acronym, dtype=[('acronym', 'U256')])
+
     import numpy.lib.recfunctions as rfn
-    cells_data = rfn.merge_arrays([source[:], coordinates_transformed, label, names], flatten=True, usemask=False)
+    cells_data = rfn.merge_arrays([source[:], coordinates_transformed, label, ID, acronym, names], flatten=True, usemask=False)
   
     io.write(ws.filename('cells'), cells_data)
   
@@ -226,7 +230,7 @@ if __name__ == "__main__":
     #%% CSV export
   
     source = ws.source('cells');
-    header = ', '.join([h[0] for h in source.dtype.names]);
+    header = ', '.join([h for h in source.dtype.names]);
     np.savetxt(ws.filename('cells', extension='csv'), source[:], header=header, delimiter=',', fmt='%s')
   
     #%% ClearMap 1.0 export
@@ -260,7 +264,7 @@ if __name__ == "__main__":
         method = 'sphere', 
         radius = (7,7,7), 
         kernel = None, 
-        processes = None, 
+        processes = 16, 
         verbose = True
         )
   
@@ -275,7 +279,7 @@ if __name__ == "__main__":
         method = 'sphere', 
         radius = (7,7,7), 
         kernel = None, 
-        processes = None, 
+        processes = 16, 
         verbose = True
         )
   
