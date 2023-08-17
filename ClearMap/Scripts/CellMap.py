@@ -161,12 +161,12 @@ if __name__ == "__main__":
   #%% Cell detection:
   
   cell_detection_parameter = cells.default_cell_detection_parameter.copy();
-  
+  cell_detection_parameter['intensity_detection']['measure'] = ['source']; 
   # CONFIGURE CELL DETECTION PARAMETERS
     
   processing_parameter = cells.default_cell_detection_processing_parameter.copy();
   processing_parameter.update( # CONFIGURE PROCESSING PARAMETERS
-      processes = 4, # 'serial',
+      processes = 16, # 'serial',
       size_max = 100, #100, #35,
       size_min = 50,# 30, #30,
       overlap  = 32, #32, #10,
@@ -239,7 +239,7 @@ if __name__ == "__main__":
   acronym = np.array(acronym, dtype=[('acronym', 'U256')])
 
   import numpy.lib.recfunctions as rfn
-  cells_data = rfn.merge_arrays([source[:], coordinates_transformed, label, ID, acronym, names], flatten=True, usemask=False)
+  cells_data = rfn.merge_arrays([source[:], coordinates_transformed, label, ID, acronym, names,], flatten=True, usemask=False)
   
   io.write(ws.filename('cells'), cells_data)
   
