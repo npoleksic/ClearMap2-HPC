@@ -41,7 +41,6 @@ if __name__ == "__main__":
   sys.path.append('/home/npoleksic/ClearMap2-HPC') # CONFIGURE PATH TO CLEARMAP
   from ClearMap.Environment import *  #analysis:ignore
   
-    
   #directories and files
   directory = '/home/npoleksic/LSS/ncb-core/users/npoleksic/sarah_data_new_hpc' # CONFIGURE DATA DIRECTORY PATH
   expression_raw      = 'cfos/16-09-36_TR1 640_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # CONFIGURE RAW DATA PATH FROM DIRECTORY
