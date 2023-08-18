@@ -13,20 +13,42 @@ __copyright__ = 'Copyright © 2020 by Christoph Kirst'
 __webpage__   = 'http://idisco.info'
 __download__  = 'http://www.github.com/ChristophKirst/ClearMap2'
 
-import sys 
-
-def check_inputs():
-    
+import sys     
 
 if __name__ == "__main__":
      
     #%%############################################################################
     ### Initialization 
     ###############################################################################
-    check_inputs():
     
+    clearmap_path = sys.argv[1]
+    directory = sys.argv[2]
+    expression_raw = sys.argv[3]
+    expression_auto = sys.argv[4]
     
+    #Convert to tuple
+    raw_x_res = sys.argv[5] 
+    raw_y_res = sys.argv[6]
+    raw_z_res = sys.argv[7]
+    autof_x_res = sys.argv[8]
+    autof_y_res = sys.argv[9]
+    autof_z_res = sys.argv[10]
     
+    #Convert to boolean
+    verbosity = sys.argv[11]
+    checkpoints = sys.argv[12]
+    
+    #Convert to integers
+    x_orient = sys.argv[13]
+    y_orient = sys.argv[14]
+    z_orient = sys.argv[15]
+    x_min = sys.argv[16]
+    y_min = sys.argv[17]
+    z_min = sys.argv[18]
+    x_max = sys.argv[19]
+    y_max = sys.argv[20]
+    z_max = sys.argv[21]
+
     #%% Initialize workspace
     
     sys.path.append('/home/npoleksic/ClearMap2-HPC') # CONFIGURE PATH TO CLEARMAP
