@@ -35,19 +35,18 @@ if __name__ == "__main__":
     autof_z_res = sys.argv[10]
     
     #Convert to boolean
-    verbosity = sys.argv[11]
-    checkpoints = sys.argv[12]
+    checkpoints = sys.argv[11]
     
     #Convert to integers
-    x_orient = sys.argv[13]
-    y_orient = sys.argv[14]
-    z_orient = sys.argv[15]
-    x_min = sys.argv[16]
-    y_min = sys.argv[17]
-    z_min = sys.argv[18]
-    x_max = sys.argv[19]
-    y_max = sys.argv[20]
-    z_max = sys.argv[21]
+    x_orient = sys.argv[12]
+    y_orient = sys.argv[13]
+    z_orient = sys.argv[14]
+    x_min = sys.argv[15]
+    y_min = sys.argv[16]
+    z_min = sys.argv[17]
+    x_max = sys.argv[18]
+    y_max = sys.argv[19]
+    z_max = sys.argv[20]
 
     #%% Initialize workspace
     
@@ -156,32 +155,56 @@ if __name__ == "__main__":
     elx.align(**align_reference_parameter);
 
     #%%############################################################################
-    ### Create test data
-    ###############################################################################
-
-    #%% Crop test data 
-
-    #select sublice for testing the pipeline
-    # slicing = (slice(100,400),slice(1300,1600),slice(1150,1300));
-    # ws.create_debug('stitched', slicing=slicing);
-    # ws.debug = True;   
-
-    #%%############################################################################
     ### Cell detection
     ###############################################################################
 
     #%% Cell detection:
 
     cell_detection_parameter = cells.default_cell_detection_parameter.copy();
+    
+    cell_detection_parameter['illumination_correction']['flatfield'] = None
+    cell_detection_parameter['illumination_correction']['background'] = None
+    cell_detection_parameter['illumination_correction']['scaling'] = 'mean'
+    cell_detection_parameter['illumination_correction']['save'] = None
+    
+    cell_detection_parameter['background_correction']['shape'] = (7,7)
+    cell_detection_parameter['background_correction']['form'] = 'Disk'
+    cell_detection_parameter['background_correction']['save'] = None
+    
+    cell_detection_parameter['equalization']['percentile'] = None
+    cell_detection_parameter['equalization']['max_value'] = None
+    cell_detection_parameter['equalization']['selem'] = None
+    cell_detection_parameter['equalization']['spacing'] = None
+    cell_detection_parameter['equalization']['interpolate'] = None
+    cell_detection_parameter['equalization']['save'] = None
+
+    cell_detection_parameter['dog_filter']['shape'] = None
+    cell_detection_parameter['dog_filter']['sigma'] = None
+    cell_detection_parameter['dog_filter']['sigma2'] = None
+    cell_detection_parameter['dog_filter']['save'] = None
+    
+    cell_detection_parameter['maxima_detection']['h_max'] = None
+    cell_detection_parameter['maxima_detection']['shape'] = 5
+    cell_detection_parameter['maxima_detection']['threshold'] = 0
+    cell_detection_parameter['maxima_detection']['valid'] = True
+    cell_detection_parameter['maxima_detection']['save'] = None
+
+    cell_detection_parameter['shape_detection']['threshold'] = 700
+    cell_detection_parameter['shape_detection']['save'] = None
+
+    cell_detection_parameter['intensity_detection']['method'] = 'max'
+    cell_detection_parameter['intensity_detection']['shape'] = 3
     cell_detection_parameter['intensity_detection']['measure'] = ['source']; 
+    cell_detection_parameter['intensity_detection']['save'] = None
+
     # CONFIGURE CELL DETECTION PARAMETERS
 
     processing_parameter = cells.default_cell_detection_processing_parameter.copy();
     processing_parameter.update( # CONFIGURE PROCESSING PARAMETERS
         processes = 16, # 'serial',
-        size_max = 100, #100, #35,
-        size_min = 50,# 30, #30,
-        overlap  = 32, #32, #10,
+        size_max = 50, #100, #35,
+        size_min = 30,# 30, #30,
+        overlap  = 16, #32, #10,
         verbose = True
         )
 

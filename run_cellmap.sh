@@ -139,11 +139,11 @@ while true; do
     read RAW_FILE
     echo -e "\nDoes this look correct ([y]/n)? \"$RAW_FILE\""
     read INPUT
-    confirm_file=$(return_bool "$INPUT")
-    
-    if [ "$confirm_file" == "True" ]; then
+    if [[ "$INPUT" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         RAW_FILE=$(echo "$RAW_FILE" | sed 's:^/::') # Remove leading "/" from file name if it exists
         break
+    else
+        echo "Clearing file name..."
     fi
 done
 
@@ -156,11 +156,11 @@ while true; do
     read AUTOF_FILE
     echo -e "\nDoes this look correct ([y]/n)? \"$AUTOF_FILE\""
     read INPUT
-    confirm_file=$(return_bool "$INPUT")
-    
-    if [ "$confirm_file" == "True" ]; then
+    if [[ "$INPUT" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         AUTOF_FILE=$(echo "$AUTOF_FILE" | sed 's:^/::') # Remove leading "/" from file name if it exists
         break
+    else
+        echo "Clearing file name..."
     fi
 done
 
@@ -195,18 +195,6 @@ while true; do
     fi
 done
 
-echo -e "\nDisplaying CellMap outputs to the terminal window can aid in troubleshooting."
-while true; do
-    echo "Do you want the program to display all outputs ([y]/n)? "
-    read INPUT
-    VERBOSITY=$(return_bool "$INPUT")
-    if [ "$VERBOSITY" == "True" ] || [ "$VERBOSITY" == "False" ]; then
-        break
-    else
-        echo "Invalid input. Please try again."
-    fi
-done
-
 echo -e "\nRunning CellMap with checkpoints will allow you to examine your data after each step."
 while true; do
     echo "Do you want to run the program with checkpoints ([y]/n)? "
@@ -228,21 +216,18 @@ echo -e "\t - Path from Experimental Directory to Raw Data: $RAW_PATH"
 echo -e "\t - Path from Experimental Directory to Autofluorescence Data: $AUTOF_PATH"
 echo -e "\t - Raw Data Resolution: $RAW_DATA_RES"
 echo -e "\t - Autofluorescence Data Resolution: $AUTOF_DATA_RES"
-echo -e "\t - Running in Silent Mode: $VERBOSITY"
 echo -e "\t - Running with Checkpoints: $CHECKPOINTS"
 
 while true; do
     echo -e "\nDoes this information look correct ([y]/n)? "
     read INPUT
-    VERIFY_INFO=$(return_bool "$INPUT")
-    if [ "$VERIFY_INFO" == "True" ]; then
-        echo "SUCCESS!"
+    if [[ "$INPUT" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         break
-    elif [ "$VERIFY_INFO" == "False" ]; then
+    elif [[ "$INPUT" =~ ^([nN][oO]|[nN])$ ]]; then
         echo -e "\nExiting script...\n"
         exit 0
     else
-        echo -e "Invalid input. Please try again.\n"
+        echo "Invalid input. Please try again.\n"
     fi
 done
 
@@ -399,7 +384,24 @@ done
 
 echo -e "\nAtlas Configured!"
 
-echo -e "\nCell Detection Parameter Configuration"
+echo -e "\nThe cell detection parameters have been set to their defaults."
+echo "To use different cell detection parameters:"
+echo -e "\t - Navigate to ClearMap/Scripts/CellMapBash.py"
+echo -e "\t - Modify the parameter assignments in lines [[[[[LINES]]]]]"
+echo -e "\t - Information on cell detection parameters: tinyurl.com/2ebhwca5"
+echo -e "\t - NOTE: Save CellMapBash.py after modifying the parameters, otherwise they will be ignored"
+
+echo -e "\nPress any key to continue: "
+read -n 1 -s -r -p ""
+
+# ## POST-PROCESSING CONFIGURATION
+# # CELL FILTRATION
+# FILTER_THRESHOLD = "NULL" # Potentially multiple
+# # VOXELIZATION
+# VOXEL_WEIGHT = "NULL"
+# VOXEL_METHOD = "NULL"
+# VOXEL_RADIUS = "NULL"
+# VOXEL_KERNEL = "NULL"
 
 # PARAMETERS TO PASS
 # $CLEARMAP_PATH
@@ -412,7 +414,6 @@ echo -e "\nCell Detection Parameter Configuration"
 # $AUTOF_X_RES
 # $AUTOF_Y_RES
 # $AUTOF_Z_RES
-# $VERBOSITY
 # $CHECKPOINTS
 # $ATLAS_X_ORIENTATION
 # $ATLAS_Y_ORIENTATION
@@ -423,59 +424,3 @@ echo -e "\nCell Detection Parameter Configuration"
 # $ATLAS_X_MAX
 # $ATLAS_Y_MAX
 # $ATLAS_Z_MAX
-
-# ## CELL DETECTION PARAMETER CONFIGURATION
-# # ILLUMINATION CORRECTION
-# ILLUMINATION_FLATFIELD = "NULL"
-# ILLUMINATION_BACKGROUND = "NULL"
-# ILLUMINATION_SCALING = "NULL"
-# ILLUMINATION_SAVE = "NULL"
-# # BACKGROUND REMOVAL
-# BACKGROUND_SHAPE = "NULL"
-# BACKGROUND_FORM = "NULL"
-# BACKGROUND_SAVE = "NULL"
-# # EQUALIZATION
-# EQ_PERCENTILE = "NULL"
-# EQ_MAX = "NULL"
-# EQ_SELEM = "NULL"
-# EQ_SPACING = "NULL"
-# EQ_INTERPOLATE = "NULL"
-# EQ_SAVE = "NULL"
-# # DoG FILTER
-# DOG_SHAPE = "NULL"
-# DOG_SIGMA = "NULL"
-# DOG_SIGMA2 = "NULL"
-# DOG_SAVE = "NULL"
-# # MAXIMA DETECTION
-# MAXIMA_HMAX = "NULL"
-# MAXIMA_SHAPE = "NULL"
-# MAXIMA_THRESHOLD = "NULL"
-# MAXIMA_SAVE = "NULL"
-# # SHAPE DETECTION
-# SHAPE_THRESHOLD = "NULL"
-# SHAPE_SAVE = "NULL"
-# # INTENSITY DETECTION
-# INTENSITY_METHOD = "NULL"
-# INTENSITY_SHAPE = "NULL"
-# INTENSITY_MEASURE = "NULL"
-# INTENSITY_SAVE = "NULL"
-
-# ## POST-PROCESSING CONFIGURATION
-# # CELL FILTRATION
-# FILTER_THRESHOLD = "NULL" # Potentially multiple
-# # ANNOTATION
-# ANNOTATE_NAME = "NULL" # Consider requiring by default
-# ANNOTATE_ID = "NULL" 
-# ANNOTATE_ACRONYM = "NULL"
-# ANNOTATE_PARENT = "NULL"
-# ANNOTATE_ATLAS = "NULL"
-# ANNOTATE_ONTOLOGY = "NULL"
-# ANNOTATE_COLOR = "NULL"
-# ANNOTATE_STLVL = "NULL"
-# ANNOTATE_HEMISPHERE = "NULL"
-# # VOXELIZATION
-# VOXEL_WEIGHT = "NULL"
-# VOXEL_METHOD = "NULL"
-# VOXEL_RADIUS = "NULL"
-# VOXEL_KERNEL = "NULL"
-
