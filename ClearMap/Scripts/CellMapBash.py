@@ -47,16 +47,11 @@ if __name__ == "__main__":
     x_max = sys.argv[18]
     y_max = sys.argv[19]
     z_max = sys.argv[20]
-
-    #%% Initialize workspace
+    filter_min = sys.argv[21]
+    filter_max = sys.argv[22]
     
     sys.path.append('/home/npoleksic/ClearMap2-HPC') # CONFIGURE PATH TO CLEARMAP
     from ClearMap.Environment import *  #analysis:ignore
-
-    #directories and files
-    directory = '/home/npoleksic/LSS/ncb-core/users/npoleksic/sarah_data_new_hpc' # CONFIGURE DATA DIRECTORY PATH
-    expression_raw      = 'cfos/16-09-36_TR1 640_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # CONFIGURE RAW DATA PATH FROM DIRECTORY
-    expression_auto     = 'autof/15-12-07_TR1 autofluo_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # CONFIGURE AUTOF DATA PATH FROM DIRECTORY
 
     ws = wsp.Workspace('CellMap', directory=directory);
     ws.update(raw=expression_raw, autofluorescence=expression_auto)
@@ -220,7 +215,7 @@ if __name__ == "__main__":
 
     thresholds = {
         'source' : None,
-        'size'   : (20,90) # CONFIGURE THRESHOLDS
+        'size'   : (20,900) # CONFIGURE THRESHOLDS
         }
 
     cells.filter_cells(source = ws.filename('cells', postfix='raw'), 

@@ -45,7 +45,7 @@ echo -e "\t\t - Detect, filter, align and annotate cells"
 echo -e "\t\t - Perform voxelization and cell density analysis"
 echo -e "\t\t - Export all results to the provided experimental directory\n"
 
-echo "Helpful links:"
+echo "Useful links:"
 echo -e "\t - ClearMap2 Source Code - github.com/ChristophKirst/ClearMap2/"
 echo -e "\t - ClearMap2 Documentation - christophkirst.github.io/ClearMap2Documentation/"
 echo -e "\t - ClearMap Tutorial [VIDEO] - https://youtu.be/-WehURPyIa8\n"
@@ -384,43 +384,89 @@ done
 
 echo -e "\nAtlas Configured!"
 
-echo -e "\nThe cell detection parameters have been set to their defaults."
+echo -e "\nCell Detection Parameter Configuration"
+echo -e "\nCellMap provides the opportunity to set data-specific parameters for: "
+echo -e "\t - Illumination Correction"
+echo -e "\t - Background Correction"
+echo -e "\t - Equalization"
+echo -e "\t - DoG Filtering"
+echo -e "\t - Maxima Detection"
+echo -e "\t - Shape Detection"
+echo -e "\t - Intensity Detection"
+echo "The cell detection parameters have been set to their defaults."
 echo "To use different cell detection parameters:"
 echo -e "\t - Navigate to ClearMap/Scripts/CellMapBash.py"
 echo -e "\t - Modify the parameter assignments in lines [[[[[LINES]]]]]"
-echo -e "\t - Information on cell detection parameters: tinyurl.com/2ebhwca5"
-echo -e "\t - NOTE: Save CellMapBash.py after modifying the parameters, otherwise they will be ignored"
+echo -e "\t - IMPORTANT NOTE: Save CellMapBash.py after modifying the parameters, otherwise they will be ignored"
+echo -e "\t - More information on cell detection parameters: tinyurl.com/2ebhwca5"
 
 echo -e "\nPress any key to continue: "
 read -n 1 -s -r -p ""
 
-# ## POST-PROCESSING CONFIGURATION
-# # CELL FILTRATION
-# FILTER_THRESHOLD = "NULL" # Potentially multiple
-# # VOXELIZATION
-# VOXEL_WEIGHT = "NULL"
-# VOXEL_METHOD = "NULL"
-# VOXEL_RADIUS = "NULL"
-# VOXEL_KERNEL = "NULL"
+echo -e "\nPost-Processing and Voxelization Parameters"
+echo -e "\nDuring cell detection, CellMap may incorrectly label non-cell artifacts in the data as cells."
+echo "This can be largely corrected by thresholding for cell size."
+echo "By default, CellMap filters out detected \"cells\" below 20 microns and above 900 microns"
+echo -e "\nWould you like set your own thresholds ([y]/n)?" 
+read INPUT
+if [[ "$INPUT" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    while true; do
+        echo -e "\nEnter the minimum cell size (in microns): "
+        read FILTER_MIN
+        FILTER_MIN_CHECK=$(validate_num "$FILTER_MIN")
+        echo -e "\nEnter the maximum cell size (in microns): "
+        read FILTER_MAX
+        FILTER_MAX_CHECK=$(validate_num "$FILTER_MAX")
+        if [[ "$FILTER_MIN_CHECK" == "VALID" && "$FILTER_MAX_CHECK" == "VALID" ]]; then
+            break
+        else
+            echo -e "\nPlease ensure each input is a valid number!"
+        fi
+    done  
+else
+    FILTER_MIN="20"
+    FILTER_MAX="900"   
+fi
 
-# PARAMETERS TO PASS
-# $CLEARMAP_PATH
-# $DATA_PATH
-# $RAW_PATH
-# $AUTOF_PATH
-# $RAW_X_RES
-# $RAW_Y_RES
-# $RAW_Z_RES
-# $AUTOF_X_RES
-# $AUTOF_Y_RES
-# $AUTOF_Z_RES
-# $CHECKPOINTS
-# $ATLAS_X_ORIENTATION
-# $ATLAS_Y_ORIENTATION
-# $ATLAS_Z_ORIENTATION
-# $ATLAS_X_MIN
-# $ATLAS_Y_MIN
-# $ATLAS_Z_MIN
-# $ATLAS_X_MAX
-# $ATLAS_Y_MAX
-# $ATLAS_Z_MAX
+
+echo -e "\nThe CellMap voxelization method highlights the detected and filtered cell locations on the brain atlas."
+echo "Voxelization parameters include:"
+echo -e "\t - Voxel weight"
+echo -e "\t - Voxelization method"
+echo -e "\t - Voxel radius"
+echo -e "\t - Voxel kernel (to set weights as a function of distance)"
+echo "The voxelization parameters have been set to their defaults."
+echo "To use different cell detection parameters:"
+echo -e "\t - Navigate to ClearMap/Scripts/CellMapBash.py"
+echo -e "\t - Modify the voxelization assignments in lines [[[[[LINES]]]]] and [[[[[LINES]]]]]"
+echo -e "\t - IMPORTANT NOTE: Save CellMapBash.py after modifying the parameters, otherwise they will be ignored"
+echo -e "\t - More information on voxelization parameters: tinyurl.com/58hz4hd6"
+
+echo -e "\nPress any key to continue: "
+read -n 1 -s -r -p ""
+
+echo -e "\nAll parameters set!"
+
+echo -e "\nCELLMAP READY TO EXECUTE"
+echo -e "\nSubmitted Parameters: "
+echo -e "\t - Path to ClearMap: $CLEARMAP_PATH"
+echo -e "\t - Path to Experimental Directory: $DATA_PATH"
+echo -e "\t - Path from Experimental Directory to Raw Data: $RAW_PATH"
+echo -e "\t - Path from Experimental Directory to Autofluorescence Data: $AUTOF_PATH"
+echo -e "\t - Raw Data Resolution: $RAW_DATA_RES"
+echo -e "\t - Autofluorescence Data Resolution: $AUTOF_DATA_RES"
+echo -e "\t - Running with Checkpoints: $CHECKPOINTS"
+echo -e "\t - Atlas Orientation: ($ATLAS_X_ORIENTATION,$ATLAS_Y_ORIENTATION,$ATLAS_Z_ORIENTATION)"
+echo -e "\t - Atlas X-Crop: $ATLAS_X_MIN - $ATLAS_X_MAX"
+echo -e "\t - Atlas Y-Crop: $ATLAS_Y_MIN - $ATLAS_Y_MAX"
+echo -e "\t - Atlas Z-Crop: $ATLAS_Z_MIN - $ATLAS_Z_MAX"
+echo -e "\t - Cell Filtration Thresholds (in microns): $FILTER_MIN - $FILTER_MAX"
+
+echo -e "\nWould you like to begin executing CellMap ([y]/n)?"
+read INPUT
+if [[ "$INPUT" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    python ClearMap/Scripts/CellMapBash.py "$CLEARMAP_PATH" "$DATA_PATH" "$RAW_PATH" "$AUTOF_PATH" "$RAW_X_RES" "$RAW_Y_RES" "$RAW_Z_RES" "$AUTOF_X_RES" "$AUTOF_Y_RES" "$AUTOF_Z_RES" "$CHECKPOINTS" "$ATLAS_X_ORIENTATION" "$ATLAS_Y_ORIENTATION" "$ATLAS_Z_ORIENTATION" "$ATLAS_X_MIN" "$ATLAS_Y_MIN" "$ATLAS_Z_MIN" "$ATLAS_X_MAX" "$ATLAS_Y_MAX" "$ATLAS_Z_MAX" "$FILTER_MIN" "$FILTER_MAX"
+else
+    echo -e "\nExiting script...\n"
+    exit 0
+fi

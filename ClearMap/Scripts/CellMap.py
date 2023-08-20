@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     thresholds = {
         'source' : None,
-        'size'   : (20,90) # CONFIGURE THRESHOLDS
+        'size'   : (20,900) # CONFIGURE THRESHOLDS
         }
 
     cells.filter_cells(source = ws.filename('cells', postfix='raw'), 
