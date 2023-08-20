@@ -396,7 +396,7 @@ echo -e "\t - Intensity Detection"
 echo "The cell detection parameters have been set to their defaults."
 echo "To use different cell detection parameters:"
 echo -e "\t - Navigate to ClearMap/Scripts/CellMapBash.py"
-echo -e "\t - Modify the parameter assignments in lines [[[[[LINES]]]]]"
+echo -e "\t - Modify the parameter assignments in lines 152 to 186"
 echo -e "\t - IMPORTANT NOTE: Save CellMapBash.py after modifying the parameters, otherwise they will be ignored"
 echo -e "\t - More information on cell detection parameters: tinyurl.com/2ebhwca5"
 
@@ -438,7 +438,7 @@ echo -e "\t - Voxel kernel (to set weights as a function of distance)"
 echo "The voxelization parameters have been set to their defaults."
 echo "To use different cell detection parameters:"
 echo -e "\t - Navigate to ClearMap/Scripts/CellMapBash.py"
-echo -e "\t - Modify the voxelization assignments in lines [[[[[LINES]]]]] and [[[[[LINES]]]]]"
+echo -e "\t - Modify the voxelization assignments in lines 286 to 293 and lines 299 to 306"
 echo -e "\t - IMPORTANT NOTE: Save CellMapBash.py after modifying the parameters, otherwise they will be ignored"
 echo -e "\t - More information on voxelization parameters: tinyurl.com/58hz4hd6"
 
@@ -465,6 +465,8 @@ echo -e "\t - Cell Filtration Thresholds (in microns): $FILTER_MIN - $FILTER_MAX
 echo -e "\nWould you like to begin executing CellMap ([y]/n)?"
 read INPUT
 if [[ "$INPUT" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    cd
+    cd $CLEARMAP_PATH
     python ClearMap/Scripts/CellMapBash.py "$CLEARMAP_PATH" "$DATA_PATH" "$RAW_PATH" "$AUTOF_PATH" "$RAW_X_RES" "$RAW_Y_RES" "$RAW_Z_RES" "$AUTOF_X_RES" "$AUTOF_Y_RES" "$AUTOF_Z_RES" "$CHECKPOINTS" "$ATLAS_X_ORIENTATION" "$ATLAS_Y_ORIENTATION" "$ATLAS_Z_ORIENTATION" "$ATLAS_X_MIN" "$ATLAS_Y_MIN" "$ATLAS_Z_MIN" "$ATLAS_X_MAX" "$ATLAS_Y_MAX" "$ATLAS_Z_MAX" "$FILTER_MIN" "$FILTER_MAX"
 else
     echo -e "\nExiting script...\n"
