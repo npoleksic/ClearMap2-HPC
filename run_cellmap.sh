@@ -406,15 +406,15 @@ read -n 1 -s -r -p ""
 echo -e "\nPost-Processing and Voxelization Parameters"
 echo -e "\nDuring cell detection, CellMap may incorrectly label non-cell artifacts in the data as cells."
 echo "This can be largely corrected by thresholding for cell size."
-echo "By default, CellMap filters out detected \"cells\" below 20 microns and above 900 microns"
+echo "By default, CellMap filters out detected \"cells\" below 20 voxels and above 900 voxels"
 echo -e "\nWould you like set your own thresholds ([y]/n)?" 
 read INPUT
 if [[ "$INPUT" =~ ^([yY][eE][sS]|[yY])$ ]]; then
     while true; do
-        echo -e "\nEnter the minimum cell size (in microns): "
+        echo -e "\nEnter the minimum cell size (in voxels): "
         read FILTER_MIN
         FILTER_MIN_CHECK=$(validate_num "$FILTER_MIN")
-        echo -e "\nEnter the maximum cell size (in microns): "
+        echo -e "\nEnter the maximum cell size (in voxels): "
         read FILTER_MAX
         FILTER_MAX_CHECK=$(validate_num "$FILTER_MAX")
         if [[ "$FILTER_MIN_CHECK" == "VALID" && "$FILTER_MAX_CHECK" == "VALID" ]]; then
