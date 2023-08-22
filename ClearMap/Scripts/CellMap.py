@@ -238,7 +238,7 @@ if __name__ == "__main__":
     acronym = np.array(acronym, dtype=[('acronym', 'U256')])
 
     import numpy.lib.recfunctions as rfn
-    cells_data = rfn.merge_arrays([source[:], coordinates_transformed, label, ID, acronym, names,], flatten=True, usemask=False)
+    cells_data = rfn.merge_arrays([source[:], coordinates_transformed, label, ID, acronym, names], flatten=True, usemask=False)
 
     io.write(ws.filename('cells'), cells_data)
 
