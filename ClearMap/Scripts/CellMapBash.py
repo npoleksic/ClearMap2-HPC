@@ -154,7 +154,7 @@ if __name__ == "__main__":
     cell_detection_parameter['illumination_correction']['scaling'] = 'mean'
     cell_detection_parameter['illumination_correction']['save'] = None
     
-    cell_detection_parameter['background_correction']['shape'] = (7,7)
+    cell_detection_parameter['background_correction']['shape'] = (9,9)
     cell_detection_parameter['background_correction']['form'] = 'Disk'
     cell_detection_parameter['background_correction']['save'] = None
     
