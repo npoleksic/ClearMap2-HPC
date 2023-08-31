@@ -167,7 +167,7 @@ if __name__ == "__main__":
     cell_detection_parameter['illumination_correction']['scaling'] = 'mean'
     cell_detection_parameter['illumination_correction']['save'] = None
     
-    cell_detection_parameter['background_correction']['shape'] = (9,9)
+    cell_detection_parameter['background_correction']['shape'] = (7,7) #(9,9)
     cell_detection_parameter['background_correction']['form'] = 'Disk'
     cell_detection_parameter['background_correction']['save'] = None
     
@@ -186,13 +186,13 @@ if __name__ == "__main__":
     
     cell_detection_parameter['maxima_detection']['h_max'] = None
     cell_detection_parameter['maxima_detection']['shape'] = 5
-    cell_detection_parameter['maxima_detection']['threshold'] = 0
+    cell_detection_parameter['maxima_detection']['threshold'] = 3500 #0
     cell_detection_parameter['maxima_detection']['valid'] = True
     cell_detection_parameter['maxima_detection']['save'] = None
 
-    cell_detection_parameter['shape_detection']['threshold'] = 700
+    cell_detection_parameter['shape_detection']['threshold'] = 2000 #700
     cell_detection_parameter['shape_detection']['save'] = None
-
+    
     cell_detection_parameter['intensity_detection']['method'] = 'max'
     cell_detection_parameter['intensity_detection']['shape'] = 3
     cell_detection_parameter['intensity_detection']['measure'] = ['source']; 
@@ -256,17 +256,19 @@ if __name__ == "__main__":
     label = ano.label_points(coordinates_transformed, key='order');
     names = ano.convert_label(label, key='order', value='name');
     ID = ano.convert_label(label, key='order', value='id');
-    acronym = ano.convert_label(label, key='order', value='acronym');  
+    # acronym = ano.convert_label(label, key='order', value='acronym');  
+    parent_ID = ano.convert_label(label, key='order', value='parent_structure_id');
 
     coordinates_transformed.dtype=[(t,float) for t in ('xt','yt','zt')]
     label = np.array(label, dtype=[('order', int)]);
-    names = np.array(names, dtype=[('name', 'U256')])
-    ID = np.array(ID, dtype=[('id', int)])
-    acronym = np.array(acronym, dtype=[('acronym', 'U256')])
+    names = np.array(names, dtype=[('name', 'U256')]);
+    ID = np.array(ID, dtype=[('id', int)]);
+    # acronym = np.array(acronym, dtype=[('acronym', 'U256')])
+    parent_ID = np.array(parent_ID, dtype=[('parent_structure_id', int)]);
 
     import numpy.lib.recfunctions as rfn
 
-    cells_data = rfn.merge_arrays([source[:], coordinates_transformed, label, ID, acronym, names,], flatten=True, usemask=False)
+    cells_data = rfn.merge_arrays([source[:], coordinates_transformed, label, ID, parent_ID, names], flatten=True, usemask=False)
 
     io.write(ws.filename('cells'), cells_data)
     
