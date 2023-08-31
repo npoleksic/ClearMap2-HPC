@@ -261,10 +261,10 @@ if __name__ == "__main__":
 
     coordinates_transformed.dtype=[(t,float) for t in ('xt','yt','zt')]
     label = np.array(label, dtype=[('order', int)]);
-    names = np.array(names, dtype=[('name', 'U256')]);
+    names = np.array(names, dtype=[('name', 'U256')])
     ID = np.array(ID, dtype=[('id', int)]);
     # acronym = np.array(acronym, dtype=[('acronym', 'U256')])
-    parent_ID = np.array(parent_ID, dtype=[('parent_structure_id', int)]);
+    parent_ID = np.array(parent_ID, dtype=[('parent_structure_id', 'U235')])
 
     import numpy.lib.recfunctions as rfn
 
