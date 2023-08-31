@@ -38,21 +38,33 @@ if __name__ == "__main__":
     autof_x_res = float(sys.argv[8])
     autof_y_res = float(sys.argv[9])
     autof_z_res = float(sys.argv[10])
-    
-    checkpoints = bool(sys.argv[11])
+    if(sys.argv[11] == "True"):
+        checkpoints = True
+    else:
+        checkpoints = False
     
     #Convert to integers
     x_orient = int(sys.argv[12])
     y_orient = int(sys.argv[13])
     z_orient = int(sys.argv[14])
-    x_min = int(sys.argv[15])
-    y_min = int(sys.argv[16])
-    z_min = int(sys.argv[17])
+    
+    if(sys.argv[15] == "0"):
+        x_min = None
+    else:
+        x_min = int(sys.argv[15])
+    if(sys.argv[16] == "0"):
+        y_min = None
+    else:
+        y_min = int(sys.argv[16])
+    if(sys.argv[17] == "0"):
+        z_min = None
+    else:
+        z_min = int(sys.argv[17])
+        
     if(sys.argv[18] == "Maximum"):
         x_max = None
     else:
         x_max = int(sys.argv[18])
-    
     if(sys.argv[19] == "Maximum"):
         y_max = None
     else:
@@ -61,6 +73,7 @@ if __name__ == "__main__":
         z_max = None
     else:
         z_max = int(sys.argv[20])
+        
     filter_min = int(sys.argv[21])
     filter_max = int(sys.argv[22])
     
