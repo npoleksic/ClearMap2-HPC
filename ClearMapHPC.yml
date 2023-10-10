@@ -8,8 +8,8 @@
 #
 # ClearMap anaconda environment
 #
-# install: conda env create -f ClearMap.yml 
-# update:  conda env update -f ClearMap.yml 
+# install: conda env create -f ClearMapHPC.yml 
+# update:  conda env update -f ClearMapHPC.yml 
 name: ClearMapHPC
 channels:
   - nvidia
