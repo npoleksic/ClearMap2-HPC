@@ -18,38 +18,27 @@ channels:
   - defaults
 
 dependencies:
-  - python=3.9  # constraining seems to speed up resolution
+  - python=3.9
   - pip
   - ipython
   - vispy
-  # - pyopengl
-  # - pyqt<6
-  # - pyqtwebengine
-  # - pyqtgraph=0.12  # Problem with pyqtgraph import of QWidgets with 0.13
   - opencv
   - cython
   - numpy
   - scipy
-  - pandas<2  # Groupby syntax changes
+  - pandas<2
   - pyarrow
-  # - matplotlib
   - scikit-image
   - scikit-learn
-  - graph-tool<=2.45  # Cannot remove self loops with later versions
-  - pytorch<=1.11  # could probably upgrade
+  - graph-tool<=2.45
+  - pytorch<=1.11
   - cudatoolkit=11.6
   - configobj
   - natsort
-  - tifffile<2020.9.22  # Adds "Use DimensionOrder to determine axes order in OmeXml." which breaks ClearMap.IO
-  - xmltodict  # to compensate for old tifffile
-  - pygments
-  # - qdarkstyle
-  # - qtpy  # for qdarkstyle
-  - psutil  # required for python < 3.9 for cancelable ProcessPoolExecutors
+  - tifffile<2020.9.22
+  - xmltodict
+  - psutil
   - tqdm
-  # - mpld3  # WARNING Maybe pip
-#  - pip:
-#    - lxml
 variables:
   PYTHONNOUSERSITE: 1
 #  TMPDIR: /data/tmp  # FIXME: add option to script
