@@ -1,0 +1,21 @@
+experiment_path: "/home/npoleksic/LSS/ncbcore/users/npoleksic/sarah_data_new_hpc"
+raw_data_path: "cfos/16-09-36_TR1 640_UltraII_C00_xyz-Table Z<Z,4>.ome.tif"
+autof_data_path: "autof/15-12-07_TR1 autofluo_UltraII_C00_xyz-Table Z<Z,4>.ome.tif
+x_orientation: 3
+y_orientation: 1
+z_orientation: 2
+raw_x_resolution: 3.77556
+raw_y_resolution: 3.77556
+raw_z_resolution: 3
+autof_x_resolution: 3.77556
+autof_y_resolution: 3.77556
+autof_z_resolution: 3
+atlas_x_min: 0
+atlas_x_max: "MAX"
+atlas_y_min: 0
+atlas_y_max: "MAX"
+atlas_z_min: 0
+atlas_z_max: "MAX"
+filter_size_min: 20
+filter_size_max: 900
+include_checkpoints: true

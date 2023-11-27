@@ -67,7 +67,7 @@ else
     fi
 fi
 
-echo -e "\nBefore executing the CellMap script, verify that config_parameters.json contains your desired experimental parameters!"
+echo -e "\nBefore executing the CellMap script, verify that config_parameters.yml contains your desired experimental parameters!"
 
 CLEARMAP_PATH=$(pwd) # Set ClearMap path to current path
 
