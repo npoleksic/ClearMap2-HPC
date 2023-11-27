@@ -16,68 +16,73 @@ __download__  = 'http://www.github.com/ChristophKirst/ClearMap2'
 import sys  
 import tty
 import termios
-
+import json
 
 def checkpoint():
     print("\nPress any key to continue...")
     sys.stdin.read(1)
     
+def read_config(path):
+    try:
+        with open(path, 'r') as config_file:
+            data = json.load(config_file)
+        return data
+    except FileNotFoundError:
+        print("ERROR: CONFIG FILE NOT FOUND")
+        return None
+    except json.JSONDecodeError:
+        print("ERROR: JSON DECODING FAILED")
+        return None
+    
 if __name__ == "__main__":
-    if len(sys.argv) < 23:
-        print("SYSTEM ARG COUNT ERROR")
+    if len(sys.argv) < 1:
+        print("ERROR: SYSTEM ARG COUNT")
         sys.exit()
-    
     clearmap_path = sys.argv[1]
-    directory = sys.argv[2]
-    expression_raw = sys.argv[3]
-    expression_auto = sys.argv[4]
-    
-    raw_x_res = float(sys.argv[5])
-    raw_y_res = float(sys.argv[6])
-    raw_z_res = float(sys.argv[7])
-    autof_x_res = float(sys.argv[8])
-    autof_y_res = float(sys.argv[9])
-    autof_z_res = float(sys.argv[10])
-    if(sys.argv[11] == "True"):
-        checkpoints = True
-    else:
-        checkpoints = False
-    
-    #Convert to integers
-    x_orient = int(sys.argv[12])
-    y_orient = int(sys.argv[13])
-    z_orient = int(sys.argv[14])
-    
-    if(sys.argv[15] == "0"):
-        x_min = None
-    else:
-        x_min = int(sys.argv[15])
-    if(sys.argv[16] == "0"):
-        y_min = None
-    else:
-        y_min = int(sys.argv[16])
-    if(sys.argv[17] == "0"):
-        z_min = None
-    else:
-        z_min = int(sys.argv[17])
-        
-    if(sys.argv[18] == "Maximum"):
-        x_max = None
-    else:
-        x_max = int(sys.argv[18])
-    if(sys.argv[19] == "Maximum"):
-        y_max = None
-    else:
-        y_max = int(sys.argv[19])
-    if(sys.argv[20] == "Maximum"):
-        z_max = None
-    else:
-        z_max = int(sys.argv[20])
-        
-    filter_min = int(sys.argv[21])
-    filter_max = int(sys.argv[22])
-    
     sys.path.append(clearmap_path)
+    config = read_config('config_parameters.json')
+    
+    if config:
+        directory = config.get('experiment_path')
+        expression_raw = config.get('raw_data_folder_name')
+        expression_auto = config.get('autof_data_folder_name')
+
+        raw_x_res = config.get('raw_x_res')
+        raw_y_res = config.get('raw_y_res')
+        raw_z_res = config.get('raw_z_res')
+        autof_x_res = config.get('autof_x_res')
+        autof_y_res = config.get('autof_y_res')
+        autof_z_res = config.get('autof_z_res')
+        checkpoints = config.get('checkpoints')
+
+        #Convert to integers
+        x_orient = config.get('x_orient')
+        y_orient = config.get('y_orient')
+        z_orient = config.get('z_orient')
+        
+        x_min = config.get('x_min')
+        x_max = config.get('x_max')
+        y_min = config.get('y_min')
+        y_max = config.get('y_max')
+        z_min = config.get('z_min')
+        z_max = config.get('z_max')
+
+        if(x_min == 0):
+            x_min = None
+        if(x_max == "MAX"):
+            x_max = None
+        if(y_min == 0):
+            y_min = None
+        if(y_max == "MAX"):
+            y_max = None
+        if(z_min == 0):
+            z_min = None
+        if(z_max == "MAX"):
+            z_max = None
+
+        filter_min = config.get('filter_min')
+        filter_max = config.get('filter_max')
+    
     from ClearMap.Environment import *
 
     ws = wsp.Workspace('CellMap', directory=directory);
