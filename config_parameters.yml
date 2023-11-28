@@ -19,3 +19,37 @@ atlas_z_max: "MAX"
 filter_size_min: 20
 filter_size_max: 900
 include_checkpoints: true
+
+# illumination_correction: false
+# illumination_background: -1
+# illumination_scaling: -1
+# illumination_save: false
+# background_removal: false
+# background_shape: false
+# background_form: false
+# background_save: false
+# equalization: false
+# equalization_percentile: false
+# equalization_max: false
+# equalization_selem: false
+# equalization_spacing: false
+# equalization_interpolate: false
+# equalization_save: false
+# dog: false
+# dog_shape: false
+# dog_sigma: false
+# dog_sigma2: false
+# dog_save: false
+# maxima_detection: false
+# maxima_hmax: false
+# maxima_shape: false
+# maxima_threshold: false
+# maxima_save: false
+# shape_detection: false
+# shape_threshold: false
+# shape_save: false
+# intensity_detection: false
+# intensity_method: false
+# intensity_shape: false
+# intensity_measure: false
+# intensity_save: false
