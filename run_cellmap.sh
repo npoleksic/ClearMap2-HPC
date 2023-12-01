@@ -76,7 +76,7 @@ read INPUT
 if [[ "$INPUT" =~ ^([yY][eE][sS]|[yY])$ ]]; then
     cd
     cd $CLEARMAP_PATH
-    python ClearMap/Scripts/CellMapJSON.py "$CLEARMAP_PATH"
+    python ClearMap/Scripts/CellMap.py "$CLEARMAP_PATH"
 else
     echo -e "\nExiting script...\n"
     exit 0

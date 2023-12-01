@@ -40,7 +40,7 @@ if __name__ == "__main__":
         sys.exit()
     clearmap_path = sys.argv[1]
     sys.path.append(clearmap_path)
-    config = read_config('config_parameters.json')
+    config = read_config('config_parameters.yml')
     
     if config:
         directory = config.get('experiment_path')
@@ -262,14 +262,14 @@ if __name__ == "__main__":
     names = ano.convert_label(label, key='order', value='name');
     ID = ano.convert_label(label, key='order', value='id');
     # acronym = ano.convert_label(label, key='order', value='acronym');  
-    parent_ID = ano.convert_label(label, key='order', value='parent');
+    parent_ID = ano.convert_label(label, key='order', value='parent_structure_id');
 
     coordinates_transformed.dtype=[(t,float) for t in ('xt','yt','zt')]
     label = np.array(label, dtype=[('order', int)]);
     names = np.array(names, dtype=[('name', 'U256')])
     ID = np.array(ID, dtype=[('id', int)]);
     # acronym = np.array(acronym, dtype=[('acronym', 'U256')])
-    parent_ID = np.array(parent_ID, dtype=[('parent', int)]);
+    parent_ID = np.array(parent_ID, dtype=[('parent_structure_id', int)]);
 
     import numpy.lib.recfunctions as rfn
 
