@@ -1,24 +1,34 @@
-experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/sarah_data_new_hpc'
-raw_data_path: 'cfos/16-09-36_TR1 640_UltraII_C00_xyz-Table Z<Z,4>.ome.tif'
-autof_data_path: 'autof/15-12-07_TR1 autofluo_UltraII_C00_xyz-Table Z<Z,4>.ome.tif'
-x_orientation: 3
-y_orientation: 1
-z_orientation: 2
-raw_x_resolution: 3.77556
-raw_y_resolution: 3.77556
-raw_z_resolution: 3
-autof_x_resolution: 3.77556
-autof_y_resolution: 3.77556
-autof_z_resolution: 3
-atlas_x_min: 0
-atlas_x_max: 'MAX'
-atlas_y_min: 0
-atlas_y_max: 'MAX'
-atlas_z_min: 100
-atlas_z_max: 326
-filter_size_min: 20
-filter_size_max: 900
-include_checkpoints: false
+# PATHS
+experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/sarah_data_new_hpc' # absolute path to the experimental data folder
+raw_data_path: 'cfos/16-09-36_TR1 640_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # relative path to the raw data from the experimental data folder
+autof_data_path: 'autof/15-12-07_TR1 autofluo_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # relative path to autofluorescence data from the experimental data folder 
+# NOTE: generalize image file names with tag (i.e. Z<Z,4> instead of Z0001, Z0002, etc.)
+
+# RESOLUTION
+raw_x_resolution: 3.77556 # resolution of the raw data in the x-direction
+raw_y_resolution: 3.77556 # resolution of the raw data in the y-direction
+raw_z_resolution: 3 # resolution of the raw data in the z-direction
+autof_x_resolution: 3.77556 # resolution of the autofluorescence data in the x-direction
+autof_y_resolution: 3.77556 # resolution of the autofluorescence data in the y-direction
+autof_z_resolution: 3 # resolution of the autofluorescence data in the z-direction
+
+# ATLAS SETUP
+# NOTE: to improve performance, ensure the following parameters closely align with the experimental data
+x_orientation: 3 # atlas axis that matches experimental data x-axis
+y_orientation: 1 # atlas axis that matches experimental data y-axis
+z_orientation: 2 # atlas axis that matches experimental data z-axis
+# NOTE: orientations should be expressed as a 1, 2, or 3 corresponding to axes x, y, and z
+atlas_x_min: 0 # minimum crop in x-direction (after atlas-matching)
+atlas_x_max: 'MAX' # maximum crop in x-direction
+atlas_y_min: 0 # minimum crop in y-direction
+atlas_y_max: 'MAX' # maximum crop in y-direction
+atlas_z_min: 100 # minimum crop in z-direction
+atlas_z_max: 326 # maximum crop in z-direction
+
+# MISC
+filter_size_min: 20 # minimum cell size to be counted
+filter_size_max: 900 # maximum cell size to be counted
+include_checkpoints: false # check progress during execution
 
 # illumination_correction: false
 # illumination_background: -1
