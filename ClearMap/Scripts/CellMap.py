@@ -17,6 +17,11 @@ import sys
 import tty
 import termios
 import yaml
+import csv
+import json
+import pandas as pd
+from scipy.io import savemat
+from scipy.io import loadmat
 
 def checkpoint():
     print("\nPress any key to continue...")
@@ -33,6 +38,8 @@ def read_config(path):
     except yaml.YAMLError as exc:
         print("ERROR: YAML PARSING FAILED", exc)
         return None
+    
+
     
 if __name__ == "__main__":
     if len(sys.argv) < 1:
@@ -269,7 +276,7 @@ if __name__ == "__main__":
     names = np.array(names, dtype=[('name', 'U256')])
     ID = np.array(ID, dtype=[('id', int)]);
     # acronym = np.array(acronym, dtype=[('acronym', 'U256')])
-    parent_ID = np.array(parent_ID, dtype=[('parent_structure_id', int)]);
+    parent_ID = np.array(parent_ID, dtype=[('parent_structure_id', 'U256')]);
 
     import numpy.lib.recfunctions as rfn
 
@@ -327,4 +334,47 @@ if __name__ == "__main__":
           )
 
     vox.voxelize(coordinates, sink=ws.filename('density', postfix='intensities'), **voxelization_parameter);
-    print("CellMap Pipeline Complete!")
+        
+    csv_path = directory+'/cells.csv'
+    csv_in = pd.read_csv(csv_path)
+    
+    with open('annotations.json', 'r') as annotations:
+        region_info = json.load(annotations)
+        
+    num_regions = 1309
+    region_names = np.zeros(num_regions, dtype=object)
+    region_ids = np.zeros(num_regions)
+    region_parent_ids = np.zeros(num_regions)
+    region_children = np.zeros((num_regions), dtype=object)
+    region_counts = np.zeros(num_regions)
+    
+    for i in range(num_regions):
+        region = region_info[i+2]
+        region_names[i] = region['name']
+        region_ids[i] = region['id']
+        region_parent_ids[i] = region['parent_structure_id']
+
+    for i in range(num_regions): #findDirectChildren conversion
+        children = region_names[region_parent_ids == region_ids[i]]
+        region_children[i] = children
+        
+    total_counts = csv_in[' id'].value_counts()
+    
+    for region_id, count in total_counts.items():
+        current_id = region_id
+        while current_id != 997 or current_id != 0:
+            i, = np.where(region_ids == current_id)
+            region_counts[i] += count
+            current_id = region_parent_ids[i]
+    
+    region_data_arr = [];
+    for i in range(num_regions):
+        region_dict = {'Name': region_names[i],
+                       'ID': region_ids[i],
+                       'ParentID': region_parent_ids[i],
+                       'Children': region_children[i],
+                       'Count': region_counts[i]}
+        region_data_arr.append(region_dict)
+    
+    savemat('region_data.mat', {'region_data': region_data_arr})
+    print("CellMap Pipeline Complete!")                
