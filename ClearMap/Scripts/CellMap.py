@@ -21,7 +21,6 @@ import csv
 import json
 import pandas as pd
 from scipy.io import savemat
-from scipy.io import loadmat
 
 def checkpoint():
     print("\nPress any key to continue...")
@@ -335,12 +334,16 @@ if __name__ == "__main__":
 
     vox.voxelize(coordinates, sink=ws.filename('density', postfix='intensities'), **voxelization_parameter);
         
-    csv_path = directory+'/cells.csv'
+    # Store detected cell data into DataFrame
+    csv_in_path = directory + '/cells.csv'
     csv_in = pd.read_csv(csv_path)
     
-    with open('annotations.json', 'r') as annotations:
+    # Read modified annotation file into json object
+    json_path = clearmap_path + '/ClearMap/Resources/Atlas/annotations_reform.json'
+    with open(json_path, 'r') as annotations:
         region_info = json.load(annotations)
         
+    # Initialize data arrays for region counts 
     num_regions = 1309
     region_names = np.zeros(num_regions, dtype=object)
     region_ids = np.zeros(num_regions)
@@ -348,18 +351,22 @@ if __name__ == "__main__":
     region_children = np.zeros((num_regions), dtype=object)
     region_counts = np.zeros(num_regions)
     
+    # Assign names, IDs, and Parent IDs for each region
     for i in range(num_regions):
         region = region_info[i+2]
         region_names[i] = region['name']
         region_ids[i] = region['id']
         region_parent_ids[i] = region['parent_structure_id']
 
+    # Identify children of each region
     for i in range(num_regions): #findDirectChildren conversion
         children = region_names[region_parent_ids == region_ids[i]]
         region_children[i] = children
         
+    # Obtain frequency counts for each region ID
     total_counts = csv_in[' id'].value_counts()
     
+    # Allocate counts to appropriate regions and their parent regions
     for region_id, count in total_counts.items():
         current_id = region_id
         while current_id != 997 or current_id != 0:
@@ -367,6 +374,16 @@ if __name__ == "__main__":
             region_counts[i] += count
             current_id = region_parent_ids[i]
     
+    # Output region data as csv
+    csv_out_data = np.column_stack((region_names, region_ids, region_parent_ids, region_counts))
+    csv_headers = ["Name", "ID", "Parent ID", "Count"]
+    csv_out_path = directory + '/regions.csv'
+    with open(csv_out_path, 'w', newline='') as csv_out:
+        writer = csv.writer(csv_out)
+        writer.writerow(csv_headers)
+        writer.writerows(csv_out_data)
+    
+    # Output data for CellPlotter
     region_data_arr = [];
     for i in range(num_regions):
         region_dict = {'Name': region_names[i],
@@ -376,5 +393,7 @@ if __name__ == "__main__":
                        'Count': region_counts[i]}
         region_data_arr.append(region_dict)
     
-    savemat('region_data.mat', {'region_data': region_data_arr})
+    mat_out_path = directory + '/region_data.mat'
+    savemat(mat_out_path, {'region_data': region_data_arr})
+    
     print("CellMap Pipeline Complete!")                
