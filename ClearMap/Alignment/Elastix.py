@@ -383,11 +383,11 @@ def result_data_file(result_directory):
     The mhd file in the result directory.
   """
   files = os.listdir(result_directory);
-  files = [x for x in files if re.match('.*.mhd', x)];
+  files = [x for x in files if re.match('.*.mhd', x) or re.match('.*.tif', x)];
   files.sort();
   
   if files == []:
-    raise RuntimeError('Cannot find a valid result data file in ' + result_directory);
+    print('Cannot find a valid result data file in ' + result_directory);
   
   return os.path.join(result_directory, files[0])
 
