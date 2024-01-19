@@ -9,8 +9,8 @@ function cellPlotter % APP FOR PLOTTING CELL COUNT RESULTS
     fig.Position = [50 50 1400 700];
     tree = uitree(fig, 'tree', 'Position', [20 70 300 600]);
     plotContainer = uiaxes(fig, 'Position', [350 80 1000 600]);
-    plotContainer.Title.String = "Count of c-Fos-Expressing Cells by Region";
-    plotContainer.YLabel.String = "# of Cells";
+    plotContainer.Title.String = "Density of c-Fos-Expressing Cells by Region";
+    plotContainer.YLabel.String = "# of Cells per mm^3";
     plotContainer.YGrid = 'on';
     plotContainer.YScale = 'log';
     saveBtn = uibutton(fig, 'Text', 'SAVE AS PNG', 'Position', [600 20 100 40]);
@@ -33,7 +33,7 @@ function cellPlotter % APP FOR PLOTTING CELL COUNT RESULTS
     function populateNodes(brain, region_data)
         for i = 1:length(region_data)
             if region_data(i).ParentID == 997
-                newNode = uitreenode(brain, "Text", region_data(i).Name, "NodeData", region_data(i).Count);
+                newNode = uitreenode(brain, "Text", region_data(i).Name, "NodeData", region_data(i).Density);
                 addNode(newNode, region_data(i).ID, region_data);
             end
         end
@@ -53,7 +53,7 @@ function cellPlotter % APP FOR PLOTTING CELL COUNT RESULTS
                     continue;
                 end
                 name = region_data(index).Name;
-                count = region_data(index).Count;
+                count = region_data(index).Density;
                 ID = region_data(index).ID;
                 newNode = uitreenode(parentNode, "Text", name, "NodeData", count);
                 addNode(newNode, ID, region_data);

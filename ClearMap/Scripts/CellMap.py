@@ -21,6 +21,9 @@ import csv
 import json
 import pandas as pd
 from scipy.io import savemat
+import shutil 
+import os 
+import tifffile as tiff
 
 def checkpoint():
     print("\nPress any key to continue...")
@@ -37,8 +40,6 @@ def read_config(path):
     except yaml.YAMLError as exc:
         print("ERROR: YAML PARSING FAILED", exc)
         return None
-    
-
     
 if __name__ == "__main__":
     if len(sys.argv) < 1:
@@ -334,9 +335,11 @@ if __name__ == "__main__":
 
     vox.voxelize(coordinates, sink=ws.filename('density', postfix='intensities'), **voxelization_parameter);
         
+    print("\nProcessing cell count results...\n")
+    
     # Store detected cell data into DataFrame
     csv_in_path = directory + '/cells.csv'
-    csv_in = pd.read_csv(csv_path)
+    csv_in = pd.read_csv(csv_in_path)
     
     # Read modified annotation file into json object
     json_path = clearmap_path + '/ClearMap/Resources/Atlas/annotations_reform.json'
@@ -349,7 +352,9 @@ if __name__ == "__main__":
     region_ids = np.zeros(num_regions)
     region_parent_ids = np.zeros(num_regions)
     region_children = np.zeros((num_regions), dtype=object)
+    region_volumes = np.zeros(num_regions, dtype=float)
     region_counts = np.zeros(num_regions)
+    region_densities = np.zeros(num_regions)
     
     # Assign names, IDs, and Parent IDs for each region
     for i in range(num_regions):
@@ -362,7 +367,46 @@ if __name__ == "__main__":
     for i in range(num_regions): #findDirectChildren conversion
         children = region_names[region_parent_ids == region_ids[i]]
         region_children[i] = children
+            
+    # Prepare registration of annotation file
+    auto_to_anno_path = directory + '/elastix_auto_to_anno'
+    
+    if not os.path.exists(auto_to_anno_path):
+        os.makedirs(auto_to_anno_path)
+    shutil.copy(directory + '/elastix_auto_to_reference/TransformParameters.0.txt', auto_to_anno_path)
+    shutil.copy(directory + '/elastix_auto_to_reference/TransformParameters.1.txt', auto_to_anno_path)
+    
+    transform_anno_0 = auto_to_anno_path + '/TransformParameters.0.txt'
+    transform_anno_1 = auto_to_anno_path + '/TransformParameters.1.txt'
+    
+    def modify_transform_params(transform_param_path):
+        with open(transform_param_path, 'r') as transform_file:
+            lines = transform_file.readlines()
         
+        for i, line in enumerate(lines):
+            if "(FinalBSplineInterpolationOrder 3)" in line:
+                lines[i] = line.replace("3", "0")
+            if "(ResultImageFormat \"mhd\")" in line:
+                lines[i] = line.replace("mhd", "tiff")
+                break
+        with open(transform_param_path, 'w') as transform_file:
+            transform_file.writelines(lines)
+    
+    modify_transform_params(transform_anno_0)
+    modify_transform_params(transform_anno_1)
+    
+    # Perform annotation file transformation
+    elx.transform(source=annotation_file, transform_parameter_file=transform_anno_1, result_directory=directory)
+    os.rename(directory + '/result.tiff', directory + '/auto_to_anno.tiff')
+    
+    # Read output tiff file and compute region volume
+    region_image_path = directory + '/auto_to_anno.tiff'
+    region_image = np.asarray(tiff.imread(region_image_path))
+    unique_regions, pixel_count = np.unique(region_image, return_counts=True)
+    
+    resolution = (25*25*25)/(10**9) # Converted from micrometers^3 to millimeters^3
+    volumes = pixel_count*resolution
+    
     # Obtain frequency counts for each region ID
     total_counts = csv_in[' id'].value_counts()
     
@@ -373,27 +417,43 @@ if __name__ == "__main__":
             i, = np.where(region_ids == current_id)
             region_counts[i] += count
             current_id = region_parent_ids[i]
+            
+    # Allocate volumes to appropriate regions and their parent regions
+    for i, volume in enumerate(volumes):
+        current_id = unique_regions[i]
+        while current_id != 997 or current_id != 0:
+            j, = np.where(region_ids == current_id)
+            region_volumes[j] += volume
+            current_id = region_parent_ids[j]
+    
+    # Calculate cell expression densities
+    region_densities = np.divide(region_counts, region_volumes, where=region_volumes!=0)
+    region_densities[region_volumes == 0] = 0
+    
+    print("\nExporting cell count statistics...\n")
     
     # Output region data as csv
-    csv_out_data = np.column_stack((region_names, region_ids, region_parent_ids, region_counts))
-    csv_headers = ["Name", "ID", "Parent ID", "Count"]
+    csv_out_data = np.column_stack((region_names, region_ids, region_parent_ids, region_volumes, region_counts, region_densities))
+    csv_headers = ["Name", "ID", "Parent ID", "Volume (mm^3)", "Count", "Count per mm^3"]
     csv_out_path = directory + '/regions.csv'
     with open(csv_out_path, 'w', newline='') as csv_out:
         writer = csv.writer(csv_out)
         writer.writerow(csv_headers)
         writer.writerows(csv_out_data)
     
-    # Output data for CellPlotter
+    # Output MATLAB-compatible data
     region_data_arr = [];
     for i in range(num_regions):
         region_dict = {'Name': region_names[i],
                        'ID': region_ids[i],
                        'ParentID': region_parent_ids[i],
                        'Children': region_children[i],
-                       'Count': region_counts[i]}
+                       'Volume': region_volumes[i],
+                       'Count': region_counts[i],
+                       'Density': region_densities[i]}
         region_data_arr.append(region_dict)
     
     mat_out_path = directory + '/region_data.mat'
     savemat(mat_out_path, {'region_data': region_data_arr})
     
-    print("CellMap Pipeline Complete!")                
+    print("CellMap Pipeline Complete!")
