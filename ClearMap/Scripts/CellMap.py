@@ -349,6 +349,7 @@ if __name__ == "__main__":
     # Initialize data arrays for region counts 
     num_regions = 1309
     region_names = np.zeros(num_regions, dtype=object)
+    region_acronyms = np.zeros(num_regions, dtype=object)
     region_ids = np.zeros(num_regions)
     region_parent_ids = np.zeros(num_regions)
     region_children = np.zeros((num_regions), dtype=object)
@@ -360,6 +361,7 @@ if __name__ == "__main__":
     for i in range(num_regions):
         region = region_info[i+2]
         region_names[i] = region['name']
+        region_acronyms[i] = region['acronym']
         region_ids[i] = region['id']
         region_parent_ids[i] = region['parent_structure_id']
 
@@ -433,8 +435,8 @@ if __name__ == "__main__":
     print("\nExporting cell count statistics...\n")
     
     # Output region data as csv
-    csv_out_data = np.column_stack((region_names, region_ids, region_parent_ids, region_volumes, region_counts, region_densities))
-    csv_headers = ["Name", "ID", "Parent ID", "Volume (mm^3)", "Count", "Count per mm^3"]
+    csv_out_data = np.column_stack((region_names, region_acronyms, region_ids, region_parent_ids, region_volumes, region_counts, region_densities))
+    csv_headers = ["Name", "Acronym", "ID", "Parent ID", "Volume (mm^3)", "Count", "Count per mm^3"]
     csv_out_path = directory + '/regions.csv'
     with open(csv_out_path, 'w', newline='') as csv_out:
         writer = csv.writer(csv_out)
@@ -445,6 +447,7 @@ if __name__ == "__main__":
     region_data_arr = [];
     for i in range(num_regions):
         region_dict = {'Name': region_names[i],
+                       'Acronym': region_acronyms[i],
                        'ID': region_ids[i],
                        'ParentID': region_parent_ids[i],
                        'Children': region_children[i],
