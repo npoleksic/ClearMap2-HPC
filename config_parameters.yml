@@ -27,5 +27,5 @@ atlas_z_max: 326 # maximum crop in z-direction
 
 # MISC
 filter_size_min: 20 # minimum cell size to be counted
-filter_size_max: 900 # maximum cell size to be counted
+filter_size_max: 100 # maximum cell size to be counted
 include_checkpoints: false # check progress during execution
