@@ -89,6 +89,9 @@ if __name__ == "__main__":
 
         filter_min = config.get('filter_size_min')
         filter_max = config.get('filter_size_max')
+        
+        if(filter_max == "MAX"):
+            filter_max = None
     
     from ClearMap.Environment import *
 
@@ -179,7 +182,8 @@ if __name__ == "__main__":
     cell_detection_parameter['illumination_correction']['scaling'] = 'mean'
     cell_detection_parameter['illumination_correction']['save'] = None
     
-    cell_detection_parameter['background_correction']['shape'] = (7,7) #(9,9)
+    # cell_detection_parameter['background_correction'] = None
+    cell_detection_parameter['background_correction']['shape'] = (9,9)
     cell_detection_parameter['background_correction']['form'] = 'Disk'
     cell_detection_parameter['background_correction']['save'] = None
     
@@ -197,12 +201,12 @@ if __name__ == "__main__":
     cell_detection_parameter['dog_filter']['save'] = None
     
     cell_detection_parameter['maxima_detection']['h_max'] = None
-    cell_detection_parameter['maxima_detection']['shape'] = 5
-    cell_detection_parameter['maxima_detection']['threshold'] = 3500 #0
+    cell_detection_parameter['maxima_detection']['shape'] = 7
+    cell_detection_parameter['maxima_detection']['threshold'] = 3500 
     cell_detection_parameter['maxima_detection']['valid'] = True
     cell_detection_parameter['maxima_detection']['save'] = None
 
-    cell_detection_parameter['shape_detection']['threshold'] = 2000 #700
+    cell_detection_parameter['shape_detection']['threshold'] = 2700
     cell_detection_parameter['shape_detection']['save'] = None
     
     cell_detection_parameter['intensity_detection']['method'] = 'max'
@@ -314,7 +318,7 @@ if __name__ == "__main__":
           dtype = None, 
           weights = None,
           method = 'sphere', 
-          radius = (7,7,7), 
+          radius = (1,1,1), 
           kernel = None, 
           processes = 16, 
           verbose = True
@@ -327,7 +331,7 @@ if __name__ == "__main__":
           dtype = None, 
           weights = intensities,
           method = 'sphere', 
-          radius = (7,7,7), 
+          radius = (1,1,1), 
           kernel = None, 
           processes = 16, 
           verbose = True

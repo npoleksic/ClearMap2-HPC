@@ -1,5 +1,5 @@
 # PATHS
-experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/annotation_test' # absolute path to the experimental data folder
+experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/sample_brain_2' # absolute path to the experimental data folder
 raw_data_path: 'cfos/16-09-36_TR1 640_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # relative path to the raw data from the experimental data folder
 autof_data_path: 'autof/15-12-07_TR1 autofluo_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # relative path to autofluorescence data from the experimental data folder 
 # NOTE: generalize image file names with tag (i.e. Z<Z,4> instead of Z0001, Z0002, etc.)
@@ -26,6 +26,6 @@ atlas_z_min: 100 # minimum crop in z-direction
 atlas_z_max: 326 # maximum crop in z-direction
 
 # MISC
-filter_size_min: 20 # minimum cell size to be counted
-filter_size_max: 100 # maximum cell size to be counted
+filter_size_min: 5 # minimum cell size to be counted
+filter_size_max: 'MAX' # maximum cell size to be counted
 include_checkpoints: false # check progress during execution
