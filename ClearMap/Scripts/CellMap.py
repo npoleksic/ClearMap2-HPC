@@ -86,13 +86,148 @@ if __name__ == "__main__":
             z_min = None
         if(z_max == "MAX"):
             z_max = None
+            
+        illumination = config.get('illumination_correction')
+        illumination_flatfield = config.get('illumination_correction_flatfield')
+        illumination_background = config.get('illumination_correction_background')
+        illumination_scaling = config.get('illumination_correction_scaling')
+        illumination_save = config.get('illumination_correction_save')
+        
+        if not illumination_flatfield:
+            illumination_flatfield = None
+        if not illumination_background:
+            illumination_background = None
+        if not illumination_scaling:
+            illumination_scaling = None
+        if illumination_save:
+            illumination_save = ws.filename('cells', postfix='illumination')
+        else:
+            illumination_save = None
+            
+        background = config.get('background_correction')
+        b_shape = config.get('background_correction_shape')
+        b_form = config.get('background_correction_form')
+        b_save = config.get('background_correction_save')
+        
+        if not b_shape:
+            b_shape = None
+        else:
+            b_shape = tuple(b_shape)
+        if not b_form:
+            b_form = None
+        if b_save:
+            b_save = ws.filename('cells', postfix='background')
+        else:
+            b_save = None
+            
+        equalization = config.get('equalization')
+        e_percentile = config.get('equalization_percentile')
+        e_max_value = config.get('equalization_max_value')
+        e_selem = config.get('equalization_selem')
+        e_spacing = config.get('equalization_spacing')
+        e_interpolate = config.get('equalization_interpolate')
+        e_save = config.get('equalization_save')
+        
+        if not e_percentile:
+            e_percentile = None
+        else:
+            e_percentile = tuple(e_percentile)
+        if not e_max_value:
+            e_max_value = None
+        if not e_selem:
+            e_selem = None
+        else:
+            e_selem = tuple(e_selem)
+        if not e_spacing:
+            e_spacing = None
+        else:
+            e_spacing = tuple(e_spacing)
+        if not e_interpolate:
+            e_interpolate = None
+        if e_save:
+            e_save = ws.filename('cells', postfix='equalization')
+        else:
+            e_save = None
+            
+        dog = config.get('dog_filter')
+        d_shape = config.get('dog_filter_shape')
+        d_sigma = config.get('dog_filter_sigma')
+        d_sigma2 = config.get('dog_filter_sigma2')
+        d_save = config.get('dog_filter_save')
+        
+        if not d_shape:
+            d_shape = None
+        else:
+            d_shape = tuple(d_shape)
+        if not d_sigma:
+            d_sigma = None
+        # else:
+        #     d_sigma = tuple(d_sigma)
+        if not d_sigma2:
+            d_sigma2 = None
+        # else:
+        #     d_sigma2 = tuple(d_sigma2)
+        if d_save:
+            d_save = ws.filename('cells', postfix='dog')
+        else:
+            d_save = None
+            
+        maxima = config.get('maxima_detection')
+        m_h_max = config.get('maxima_detection_h_max')
+        m_shape = config.get('maxima_detection_shape')
+        m_thresh = config.get('maxima_detection_threshold')
+        m_valid = config.get('maxima_detection_valid')
+        m_save = config.get('maxima_detection_save')
+        
+        if not m_h_max:
+            m_h_max = None
+        if not m_shape:
+            m_shape = None
+        # else:
+        #     m_shape = tuple(m_shape)
+        if not m_thresh:
+            m_thresh = None
+        if m_save:
+            m_save = ws.filename('cells', postfix='maxima')
+        else:
+            m_save = None
 
+        shape_detection = config.get('shape_detection')
+        s_thresh = config.get('shape_detection_threshold')
+        s_save = config.get('shape_detection_save')
+
+        if not s_thresh:
+            s_thresh = None
+        if s_save:
+            s_save = ws.filename('cells', postfix='shape')
+        else:
+            s_save = None
+            
+        intensity = config.get('intensity_detection')
+        intensity_method = config.get('intensity_detection_method')
+        intensity_shape = config.get('intensity_detection_shape')
+        intensity_measure = config.get('intensity_detection_measure')
+        intensity_save = config.get('intensity_detection_save')
+        
+        if not intensity_method:
+            intensity_method = None
+        if not intensity_shape:
+            intensity_shape = None
+        if not intensity_measure:
+            intensity_measure = None
+        else:
+            intensity_measure = ['source'];
+        if intensity_save:
+            intensity_save = ws.filename('cells', postfix='intensity')
+        else:
+            intensity_save = None
+        
         filter_min = config.get('filter_size_min')
         filter_max = config.get('filter_size_max')
         
         if(filter_max == "MAX"):
             filter_max = None
-    
+            
     from ClearMap.Environment import *
 
     ws = wsp.Workspace('CellMap', directory=directory);
@@ -177,43 +312,63 @@ if __name__ == "__main__":
 
     cell_detection_parameter = cells.default_cell_detection_parameter.copy();
     
-    cell_detection_parameter['illumination_correction']['flatfield'] = None
-    cell_detection_parameter['illumination_correction']['background'] = None
-    cell_detection_parameter['illumination_correction']['scaling'] = 'mean'
-    cell_detection_parameter['illumination_correction']['save'] = None
+    if illumination:
+        cell_detection_parameter['illumination_correction']['flatfield'] = illumination_flatfield
+        cell_detection_parameter['illumination_correction']['background'] = illumination_background
+        cell_detection_parameter['illumination_correction']['scaling'] = illumination_scaling
+        cell_detection_parameter['illumination_correction']['save'] = illumination_save
+    else:
+        cell_detection_parameter['illumination_correction'] = None
+        
+    if background:
+        cell_detection_parameter['background_correction']['shape'] = b_shape
+        cell_detection_parameter['background_correction']['form'] = b_form
+        cell_detection_parameter['background_correction']['save'] = b_save
+    else:
+        cell_detection_parameter['background_correction'] = None
     
-    # cell_detection_parameter['background_correction'] = None
-    cell_detection_parameter['background_correction']['shape'] = (9,9)
-    cell_detection_parameter['background_correction']['form'] = 'Disk'
-    cell_detection_parameter['background_correction']['save'] = None
-    
-    cell_detection_parameter['equalization'] = None
-    # cell_detection_parameter['equalization']['percentile'] = None
-    # cell_detection_parameter['equalization']['max_value'] = None
-    # cell_detection_parameter['equalization']['selem'] = None
-    # cell_detection_parameter['equalization']['spacing'] = None
-    # cell_detection_parameter['equalization']['interpolate'] = None
-    # cell_detection_parameter['equalization']['save'] = None
+    if equalization:
+        cell_detection_parameter['equalization'] = None
+        # cell_detection_parameter['equalization']['percentile'] = e_percentile
+        # cell_detection_parameter['equalization']['max_value'] = e_max_value
+        # cell_detection_parameter['equalization']['selem'] = e_selem
+        # cell_detection_parameter['equalization']['spacing'] = e_spacing
+        # cell_detection_parameter['equalization']['interpolate'] = e_interpolate
+        # cell_detection_parameter['equalization']['save'] = e_save
+    else:
+        cell_detection_parameter['equalization'] = None
 
-    cell_detection_parameter['dog_filter']['shape'] = None
-    cell_detection_parameter['dog_filter']['sigma'] = None
-    cell_detection_parameter['dog_filter']['sigma2'] = None
-    cell_detection_parameter['dog_filter']['save'] = None
+    if dog:
+        cell_detection_parameter['dog_filter']['shape'] = d_shape
+        cell_detection_parameter['dog_filter']['sigma'] = d_sigma
+        cell_detection_parameter['dog_filter']['sigma2'] = d_sigma2
+        cell_detection_parameter['dog_filter']['save'] = d_save
+    else:
+        cell_detection_parameter['dog_filter'] = None
     
-    cell_detection_parameter['maxima_detection']['h_max'] = None
-    cell_detection_parameter['maxima_detection']['shape'] = 7
-    cell_detection_parameter['maxima_detection']['threshold'] = 3500 
-    cell_detection_parameter['maxima_detection']['valid'] = True
-    cell_detection_parameter['maxima_detection']['save'] = None
-
-    cell_detection_parameter['shape_detection']['threshold'] = 2700
-    cell_detection_parameter['shape_detection']['save'] = None
+    if maxima:
+        cell_detection_parameter['maxima_detection']['h_max'] = m_h_max
+        cell_detection_parameter['maxima_detection']['shape'] = m_shape
+        cell_detection_parameter['maxima_detection']['threshold'] = m_thresh
+        cell_detection_parameter['maxima_detection']['valid'] = m_valid
+        cell_detection_parameter['maxima_detection']['save'] = m_save
+    else:
+        cell_detection_parameter['maxima_detection'] = None
+        
+    if shape_detection:
+        cell_detection_parameter['shape_detection']['threshold'] = s_thresh
+        cell_detection_parameter['shape_detection']['save'] = s_save
+    else:
+        cell_detection_parameter['shape_detection'] = None
     
-    cell_detection_parameter['intensity_detection']['method'] = 'max'
-    cell_detection_parameter['intensity_detection']['shape'] = 3
-    cell_detection_parameter['intensity_detection']['measure'] = ['source']; 
-    # cell_detection_parameter['intensity_detection']['save'] = None
-
+    if intensity:
+        cell_detection_parameter['intensity_detection']['method'] = intensity_method
+        cell_detection_parameter['intensity_detection']['shape'] = intensity_shape
+        cell_detection_parameter['intensity_detection']['measure'] = intensity_measure
+        # cell_detection_parameter['intensity_detection']['save'] = intensity_save
+    else:
+        cell_detection_parameter['intensity_detection'] = None
+        
     processing_parameter = cells.default_cell_detection_processing_parameter.copy();
     processing_parameter.update(
         processes = 12,

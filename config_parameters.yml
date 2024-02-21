@@ -1,5 +1,5 @@
 # PATHS
-experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/sample_brain_2' # absolute path to the experimental data folder
+experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/sample_brain' # absolute path to the experimental data folder
 raw_data_path: 'cfos/16-09-36_TR1 640_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # relative path to the raw data from the experimental data folder
 autof_data_path: 'autof/15-12-07_TR1 autofluo_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # relative path to autofluorescence data from the experimental data folder 
 # NOTE: generalize image file names with tag (i.e. Z<Z,4> instead of Z0001, Z0002, etc.)
@@ -26,6 +26,50 @@ atlas_z_min: 100 # minimum crop in z-direction
 atlas_z_max: 326 # maximum crop in z-direction
 
 # MISC
-filter_size_min: 5 # minimum cell size to be counted
+filter_size_min: 20 # minimum cell size to be counted
 filter_size_max: 'MAX' # maximum cell size to be counted
 include_checkpoints: false # check progress during execution
+
+# CELL DETECTION PARAMETERS -> CHECK ORIGINAL CLEARMAP DOCUMENTATION FOR DETAILS 
+
+illumination_correction: true # true or false
+illumination_correction_flatfield: false # array, string, or false
+illumination_correction_background: false # array or false
+illumination_correction_scaling: 'mean' # float, 'max', 'mean', or false
+illumination_correction_save: false # true or false
+
+background_correction: true # true or false
+background_correction_shape: [9, 9] # 2-element array or false
+background_correction_form: 'Disk' # 'Disk', 'Sphere', 'Cube', or false
+background_correction_save: false # true or false
+
+equalization: false # true or false
+equalization_percentile: false # 2-element array or false
+equalization_max_value: false # float or false
+equalization_selem: false # array or false
+equalization_spacing: false # array or false
+equalization_interpolate: false # int or false
+equalization_save: false # true or false
+
+dog_filter: true # true or false
+dog_filter_shape: false # array or false
+dog_filter_sigma: 1 # array or false
+dog_filter_sigma2: 2 # array or false
+dog_filter_save: false # true or false
+
+maxima_detection: true # true or false
+maxima_detection_h_max: false # float or false
+maxima_detection_shape: 7 # int or false
+maxima_detection_threshold: 3500 # float or false
+maxima_detection_valid: true # true or false
+maxima_detection_save: false # true or false
+
+shape_detection: true # true or false
+shape_detection_threshold: 2700 # float or false
+shape_detection_save: false # true or false
+
+intensity_detection: true # true or false
+intensity_detection_method: 'max' # 'max', 'min', 'mean', 'sum', or false
+intensity_detection_shape: 3 # int or false
+intensity_detection_measure: true # true or false
+intensity_detection_save: false # true or false
