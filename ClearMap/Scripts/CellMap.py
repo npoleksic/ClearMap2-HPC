@@ -95,6 +95,8 @@ if __name__ == "__main__":
         
         if not illumination_flatfield:
             illumination_flatfield = None
+        else:
+            illumination_flatfield = directory + illumination_flatfield
         if not illumination_background:
             illumination_background = None
         if not illumination_scaling:
@@ -161,12 +163,12 @@ if __name__ == "__main__":
             d_shape = tuple(d_shape)
         if not d_sigma:
             d_sigma = None
-        # else:
-        #     d_sigma = tuple(d_sigma)
+        else:
+            d_sigma = tuple(d_sigma)
         if not d_sigma2:
             d_sigma2 = None
-        # else:
-        #     d_sigma2 = tuple(d_sigma2)
+        else:
+            d_sigma2 = tuple(d_sigma2)
         if d_save:
             d_save = ws.filename('cells', postfix='dog')
         else:
@@ -222,11 +224,15 @@ if __name__ == "__main__":
         else:
             intensity_save = None
         
-        filter_min = config.get('filter_size_min')
-        filter_max = config.get('filter_size_max')
+        filter_size_min = config.get('filter_size_min')
+        filter_size_max = config.get('filter_size_max')
+        filter_intensity_min = config.get('filter_intensity_min')
+        filter_intensity_max = config.get('filter_intensity_max')
         
-        if(filter_max == "MAX"):
-            filter_max = None
+        if(filter_size_max == "MAX"):
+            filter_size_max = None
+        if(filter_intensity_max == "MAX"):
+            filter_intensity_max = None
             
     from ClearMap.Environment import *
 
@@ -311,7 +317,7 @@ if __name__ == "__main__":
     print("\nDetecting cells...\n")
 
     cell_detection_parameter = cells.default_cell_detection_parameter.copy();
-    
+
     if illumination:
         cell_detection_parameter['illumination_correction']['flatfield'] = illumination_flatfield
         cell_detection_parameter['illumination_correction']['background'] = illumination_background
@@ -391,8 +397,8 @@ if __name__ == "__main__":
     source = ws.source('cells', postfix='raw')
 
     thresholds = {
-        'source' : None,
-        'size'   : (filter_min,filter_max)
+        'source' : (filter_intensity_min, filter_intensity_max),
+        'size'   : (filter_size_min, filter_size_max)
         }
 
     cells.filter_cells(source = ws.filename('cells', postfix='raw'), 
