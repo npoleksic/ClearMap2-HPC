@@ -96,7 +96,7 @@ if __name__ == "__main__":
         if not illumination_flatfield:
             illumination_flatfield = None
         else:
-            illumination_flatfield = directory + illumination_flatfield
+            illumination_flatfield = directory + "/" + illumination_flatfield
         if not illumination_background:
             illumination_background = None
         if not illumination_scaling:
