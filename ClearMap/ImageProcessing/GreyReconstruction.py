@@ -26,6 +26,7 @@ import ClearMap.ImageProcessing.Filter.StructureElement as se
 
 import ClearMap.Utils.Timer as tmr
 import ClearMap.Utils.HierarchicalDict as hdict
+# import skimage.morphology._greyreconstruct
 
 
 ###############################################################################

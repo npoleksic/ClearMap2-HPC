@@ -498,7 +498,7 @@ def detect_cells_block(source, parameter = default_cell_detection_parameter):
     
     #center of maxima
     if parameter_maxima['h_max']:
-      centers = md.find_center_of_maxima(source, maxima=maxima, verbose=verbose);
+      centers = md.find_center_of_maxima(source.array, maxima=maxima, verbose=verbose);
     else:
       centers = ap.where(maxima).array;
 

@@ -334,13 +334,12 @@ if __name__ == "__main__":
         cell_detection_parameter['background_correction'] = None
     
     if equalization:
-        cell_detection_parameter['equalization'] = None
-        # cell_detection_parameter['equalization']['percentile'] = e_percentile
-        # cell_detection_parameter['equalization']['max_value'] = e_max_value
-        # cell_detection_parameter['equalization']['selem'] = e_selem
-        # cell_detection_parameter['equalization']['spacing'] = e_spacing
-        # cell_detection_parameter['equalization']['interpolate'] = e_interpolate
-        # cell_detection_parameter['equalization']['save'] = e_save
+        cell_detection_parameter['equalization']['percentile'] = e_percentile
+        cell_detection_parameter['equalization']['max_value'] = e_max_value
+        cell_detection_parameter['equalization']['selem'] = e_selem
+        cell_detection_parameter['equalization']['spacing'] = e_spacing
+        cell_detection_parameter['equalization']['interpolate'] = e_interpolate
+        cell_detection_parameter['equalization']['save'] = e_save
     else:
         cell_detection_parameter['equalization'] = None
 

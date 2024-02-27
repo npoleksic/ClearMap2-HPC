@@ -34,7 +34,7 @@ illumination_correction_scaling: 'max' # float, 'max', 'mean', or false
 illumination_correction_save: false # true or false
 
 background_correction: true # true or false
-background_correction_shape: [15, 15] # 2-element array or false
+background_correction_shape: [13,13] # 2-element array or false
 background_correction_form: 'Disk' # 'Disk', 'Sphere', 'Cube', or false
 background_correction_save: false # true or false
 
@@ -47,14 +47,14 @@ equalization_interpolate: false # int or false
 equalization_save: false # true or false
 
 dog_filter: true # true or false
-dog_filter_shape: [9,9,9] # array or false
+dog_filter_shape: [11,11,11] # array or false
 dog_filter_sigma: [1] # array or false
 dog_filter_sigma2: [2] # array or false
 dog_filter_save: false # true or false
 
 maxima_detection: true # true or false
-maxima_detection_h_max: false # float or false
-maxima_detection_shape: 9 # int or false
+maxima_detection_h_max: 3000 # float or false
+maxima_detection_shape: 11 # int or false
 maxima_detection_threshold: 3500 # float or false
 maxima_detection_valid: true # true or false
 maxima_detection_save: false # true or false
@@ -65,7 +65,7 @@ shape_detection_save: false # true or false
 
 intensity_detection: true # true or false
 intensity_detection_method: 'max' # 'max', 'min', 'mean', 'sum', or false
-intensity_detection_shape: 9 # int or false
+intensity_detection_shape: 11 # int or false
 intensity_detection_measure: true # true or false
 intensity_detection_save: false # true or false
 
