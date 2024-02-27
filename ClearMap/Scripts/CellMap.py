@@ -49,19 +49,22 @@ def read_config(path):
 def remove_overlap(source, filter_distance_min):
     indices_to_remove = set()
     source_coordinates = np.column_stack((source['x'], source['y'], source['z']))
-
+    count = 0
+    
     for i in range(len(source_coordinates)):
         if i not in indices_to_remove:
             current_point = source_coordinates[i]  
             
             diffs = abs(source_coordinates - current_point)
 
-            close_indices = np.where(np.any(diffs < filter_distance_min, axis=1))[0]
+            close_indices = np.where(np.all(diffs < filter_distance_min, axis=1))[0]
             close_indices = close_indices[close_indices != i]
 
             if close_indices.size > 0:
+                count = count + close_indices.size
                 indices_to_remove.update(set(close_indices))
 
+    print(str(count) + " duplicate coordinates removed!")
     return np.delete(source, list(indices_to_remove), axis=0)
     
     
@@ -256,6 +259,8 @@ if __name__ == "__main__":
             illumination_flatfield = directory + "/" + illumination_flatfield
         if not illumination_background:
             illumination_background = None
+        else:
+            illumination_background = directory + "/" + illumination_background
         if not illumination_scaling:
             illumination_scaling = None
         if illumination_save:
