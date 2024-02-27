@@ -46,29 +46,21 @@ def read_config(path):
         return None
 
     
-    
 def remove_overlap(source, filter_distance_min):
     indices_to_remove = set()
     source_coordinates = np.column_stack((source['x'], source['y'], source['z']))
-    # source_intensity = source['source']
 
     for i in range(len(source_coordinates)):
         if i not in indices_to_remove:
             current_point = source_coordinates[i]  
             
-            x_diffs = abs(source_coordinates[:,0] - current_point[0])
-            y_diffs = abs(source_coordinates[:,1] - current_point[1])
-            z_diffs = abs(source_coordinates[:,2] - current_point[2])
-            
-            close_indices = np.where((x_diffs < filter_distance_min) and (y_diffs < filter_distance_min) and (z_diffs < filter_distance_min))[0]
-            # distances = np.linalg.norm(source_coordinates - current_point, axis=1)
-            # close_indices = np.where(distances < filter_distance_min)[0]
+            diffs = abs(source_coordinates - current_point)
+
+            close_indices = np.where(np.any(diffs < filter_distance_min, axis=1))[0]
             close_indices = close_indices[close_indices != i]
 
             if close_indices.size > 0:
-                # max_intensity_index = np.argmax(source_intensity[close_indices])
                 indices_to_remove.update(set(close_indices))
-                # indices_to_remove.update(set(close_indices) - {close_indices[max_intensity_index]})
 
     return np.delete(source, list(indices_to_remove), axis=0)
     
@@ -79,6 +71,7 @@ def register_annotation(directory):
 
     if not os.path.exists(auto_to_anno_path):
         os.makedirs(auto_to_anno_path)
+        
     shutil.copy(directory + '/elastix_auto_to_reference/TransformParameters.0.txt', auto_to_anno_path)
     shutil.copy(directory + '/elastix_auto_to_reference/TransformParameters.1.txt', auto_to_anno_path)
 
