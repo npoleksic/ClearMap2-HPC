@@ -132,6 +132,8 @@ def correct_illumination(source, flatfield = None, background = None, scaling = 
   
   # rescale factor
   flatfield = flatfield.array.astype(dtype);
+  flatfield = flatfield + 1; # Avoid div/0
+
   if scaling is True:
     scaling = "mean";
   if isinstance(scaling, str):
