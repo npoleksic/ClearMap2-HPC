@@ -49,25 +49,30 @@ def read_config(path):
 def remove_overlap(source, filter_distance_min):
     indices_to_remove = set()
     source_coordinates = np.column_stack((source['x'], source['y'], source['z']))
-    count = 0
+    z_overlap_min = np.array([filter_distance_min/2, filter_distance_min/2, filter_distance_min*2])
     
     for i in range(len(source_coordinates)):
         if i not in indices_to_remove:
             current_point = source_coordinates[i]  
             
             diffs = abs(source_coordinates - current_point)
-
+            
             close_indices = np.where(np.all(diffs < filter_distance_min, axis=1))[0]
             close_indices = close_indices[close_indices != i]
+            
+            close_z_indices = np.where(np.all(diffs < z_overlap_min, axis=1))[0]
+            close_z_indices = close_z_indices[close_z_indices != i]
 
             if close_indices.size > 0:
-                count = count + close_indices.size
                 indices_to_remove.update(set(close_indices))
+                indices_to_remove.update(set(close_z_indices))
 
-    print(str(count) + " duplicate coordinates removed!")
     return np.delete(source, list(indices_to_remove), axis=0)
     
+def remove_universe(source):
     
+    universe_indices = np.where(source['name'] == 'universe')[0]
+    return np.delete(source, universe_indices, axis=0)
     
 def register_annotation(directory):
     auto_to_anno_path = directory + '/elastix_auto_to_anno'
@@ -116,7 +121,7 @@ def get_region_stats(num_regions, directory, region_ids, region_parent_ids):
     # Read output tiff file and compute region volume
     region_image_path = directory + '/auto_to_anno.tif'
     # region_image = np.asarray(tiff.imread(region_image_path))
-    unique_regions, pixel_count = np.unique(io.as_source(region_image_path), return_counts=True)
+    unique_regions, pixel_count = np.unique(io.as_source(region_image_path).array, return_counts=True)
 
     resolution = (25*25*25)/(10**9) # Converted from micrometers^3 to millimeters^3
     volumes = pixel_count*resolution
@@ -618,7 +623,8 @@ if __name__ == "__main__":
     print("\nExporting data and beginning cell voxelization...\n")
     source = ws.source('cells');
     header = ', '.join([h for h in source.dtype.names]);
-    source = np.flip(np.sort(source.array, order=['source']),axis=0)
+    source = remove_universe(source.array)
+    source = np.flip(np.sort(source, order=['source']),axis=0)
     source = remove_overlap(source, filter_distance_min) #TODO: Modify remove_overlap to sort source by decreasing intensity so that eliminating nearby detected "cells" is easier
     source = np.sort(source, order=['z'])
     np.savetxt(ws.filename('cells', extension='csv'), source, header=header, delimiter=',', fmt='%s')

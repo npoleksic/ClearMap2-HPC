@@ -28,8 +28,8 @@ atlas_z_max: 326 # maximum crop in z-direction
 # CELL DETECTION PARAMETERS -> CHECK ORIGINAL CLEARMAP DOCUMENTATION FOR DETAILS 
 
 illumination_correction: true # true or false
-illumination_correction_flatfield: 'flatfield.tif' # array, string, or false
-illumination_correction_background: 'darkfield.tif' # array, string, or false
+illumination_correction_flatfield: false #'flatfield.tif' # array, string, or false
+illumination_correction_background: false #'darkfield.tif' # array, string, or false
 illumination_correction_scaling: 'max' # float, 'max', 'mean', or false
 illumination_correction_save: false # true or false
 
