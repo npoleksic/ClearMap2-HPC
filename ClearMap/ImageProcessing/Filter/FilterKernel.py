@@ -330,7 +330,7 @@ def filter_kernel_3d(ftype = 'Gaussian', shape = (5,5,5), sigma = None, sigma2 =
       return ker - ker.sum()/len(ker);
       
   elif ftype == 'dog':
-      
+    
       if sigma2 == None:
           sigma2 = shape / 2. / math.sqrt(2 * math.log(2));
       sigma2 = np.array(sigma2);

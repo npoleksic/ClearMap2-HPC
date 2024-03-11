@@ -452,7 +452,7 @@ def detect_cells_block(source, parameter = default_cell_detection_parameter):
       hdict.pprint(parameter_dog_filter, head = prefix + 'DoG filter:')    
     
     save = parameter_dog_filter.pop('save', None);
-    
+
     dog = dog_filter(equalized, **parameter_dog_filter);
         
     if save:
@@ -490,8 +490,9 @@ def detect_cells_block(source, parameter = default_cell_detection_parameter):
     valid = parameter_maxima.pop('valid', None);
     
     # extended maxima
-    maxima = md.find_maxima(source.array, **parameter_maxima, verbose=verbose);
-  
+    maxima = md.find_maxima(dog, **parameter_maxima, verbose=verbose);
+    # maxima = md.find_maxima(source.array, **parameter_maxima, verbose=verbose);
+    
     if save:
       save = io.as_source(save);
       save[base_slicing] = maxima[valid_slicing];
