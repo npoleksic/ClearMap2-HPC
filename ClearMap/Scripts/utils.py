@@ -118,6 +118,36 @@ def remove_universe(source):
     
     
     
+def transformation(coordinates):
+
+    """Transforms detected cell coordinates onto atlas space
+    
+    Arguments
+    ---------
+        coordinates : array
+            x, y, and z coordinates for each detected cell on experimental data
+    Returns
+    -------
+        coordinates : array
+            Corresponding x, y, and z coordinates transformed onto the brain atlas space
+    """    
+    
+    import ClearMap.Alignment.Elastix as elx
+    
+    coordinates = elx.transform_points(
+                    coordinates, sink=None, 
+                    transform_directory=align_channel_outdir, 
+                    binary=True, indices=False);
+
+    coordinates = elx.transform_points(
+                    coordinates, sink=None, 
+                    transform_directory=align_reference_outdir,
+                    binary=True, indices=False);
+
+    return coordinates
+    
+
+    
 def register_annotation(directory, annotation_file):
     
     """Aligns annotation atlas to fit the shape of the autofluorescence data

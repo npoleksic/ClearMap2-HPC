@@ -4,14 +4,11 @@
 CellMap
 =======
 
-Adapted CellMap.py to be executed from a shell script with YAML configuration file
+Adapted original ClearMap2.0 CellMap.py script to be executed from a shell script with YAML configuration file
 
 """
-__author__    = 'Christoph Kirst <christoph.kirst.ck@gmail.com>'
 __license__   = 'GPLv3 - GNU General Pulic License v3 (see LICENSE)'
 __copyright__ = 'Copyright © 2020 by Christoph Kirst'
-__webpage__   = 'http://idisco.info'
-__download__  = 'http://www.github.com/ChristophKirst/ClearMap2'
 
 from utils import *
 
@@ -386,18 +383,6 @@ if __name__ == "__main__":
                        thresholds=thresholds); 
 
     source = ws.source('cells', postfix='filtered')
-
-    def transformation(coordinates):
-
-        coordinates = elx.transform_points(
-                        coordinates, sink=None, 
-                        transform_directory=align_channel_outdir, 
-                        binary=True, indices=False);
-
-        coordinates = elx.transform_points(
-                        coordinates, sink=None, 
-                        transform_directory=align_reference_outdir,
-                        binary=True, indices=False);
     
     coordinates = np.array([source[c] for c in 'xyz']).T;
     
@@ -426,7 +411,7 @@ if __name__ == "__main__":
         print("\nCell annotation complete!")
         checkpoint()
         
-    print("\nExporting data and beginning cell voxelization...\n")
+    print("\nRemoving invalid cells and exporting detected cell data...\n")
     
     # Remove invalid and overlapping cells. Export corrected cell data to CSV
     source = ws.source('cells');
@@ -437,6 +422,7 @@ if __name__ == "__main__":
     source = np.sort(source, order=['z'])
     np.savetxt(ws.filename('cells', extension='csv'), source, header=header, delimiter=',', fmt='%s')
 
+    print("\nBeginning cell voxelization...\n")
     # Voxelize detected cells
     coordinates = np.array([source[n] for n in ['xt','yt','zt']]).T;
     intensities = source['source'];
