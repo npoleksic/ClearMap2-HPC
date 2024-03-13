@@ -242,11 +242,9 @@ if __name__ == "__main__":
     io.delete_file(sink)
     io.convert(source, sink, processes=16, verbose=True);
 
-    
     cfos = os.path.join(directory, 'cfos.tif')
     autof = os.path.join(directory, 'autofluorescence.tif')
     
-    reference_upscaled = os.path.join(directory, 'reference_upscaled.tif')
     annotation_upscaled = os.path.join(directory, 'annotation_upscaled.tif')
     
     align_channel_outdir = os.path.join(directory, 'elastix_raw_to_auto')
@@ -275,7 +273,7 @@ if __name__ == "__main__":
     # Align reference image to autfluorescent image
     align_reference_parameter = {            
         "processes" : 16,
-        "moving_image" : reference_upscaled,
+        "moving_image" : os.path.join(directory, 'reference_upscaled.tif'),
         "fixed_image"  : autof,
         "affine_parameter_file"  :  align_reference_affine_file,
         "bspline_parameter_file" :  align_reference_bspline_file,
@@ -284,11 +282,14 @@ if __name__ == "__main__":
 
     elx.align(**align_reference_parameter);
     
+    os.remove(autof)
+    os.remove(cfos)
+    
     if checkpoints:
         print("\nALIGNMENT CHECKPOINT")
         print("\nFrom the newly generated files in your experimental directory, compare: ")
-        print("\t - cfos.tif to elastix_raw_to_auto/result.0.mhd")
-        print("\t - autofluorescence.tif to elastix_auto_to_reference/result.1.mhd")
+        print("\t - raw data to elastix_raw_to_auto/result.0.mhd")
+        print("\t - autofluorescence data to elastix_auto_to_reference/result.1.mhd")
         print("Ensure the files are properly aligned in shape and slicing")
         checkpoint()
 
@@ -386,14 +387,29 @@ if __name__ == "__main__":
 
     source = ws.source('cells', postfix='filtered')
 
-    coordinates = np.array([source[c] for c in 'xyz']).T;
+    def transformation(coordinates):
 
+        coordinates = elx.transform_points(
+                        coordinates, sink=None, 
+                        transform_directory=align_channel_outdir, 
+                        binary=True, indices=False);
+
+        coordinates = elx.transform_points(
+                        coordinates, sink=None, 
+                        transform_directory=align_reference_outdir,
+                        binary=True, indices=False);
+    
+    coordinates = np.array([source[c] for c in 'xyz']).T;
+    
+    coordinates_transformed = transformation(coordinates);
+    
     # Annotate cells based on position in annotation image
-    label = ano.label_points(coordinates, key='order', annotation_array=annotation_array);
+    label = ano.label_points(coordinates_transformed, key='order', annotation_array=annotation_array);
     names = ano.convert_label(label, key='order', value='name');
     ID = ano.convert_label(label, key='order', value='id');
     parent_ID = ano.convert_label(label, key='order', value='parent_structure_id');
 
+    coordinates_transformed.dtype=[(t,float) for t in ('xt','yt','zt')]
     label = np.array(label, dtype=[('order', int)]);
     names = np.array(names, dtype=[('name', 'U256')])
     ID = np.array(ID, dtype=[('id', int)]);
@@ -402,7 +418,7 @@ if __name__ == "__main__":
     import numpy.lib.recfunctions as rfn
 
     # Assemble cell information into NumPy array
-    cells_data = rfn.merge_arrays([source[:], label, ID, parent_ID, names], flatten=True, usemask=False)
+    cells_data = rfn.merge_arrays([source[:], coordinates_transformed, label, ID, parent_ID, names], flatten=True, usemask=False)
 
     io.write(ws.filename('cells'), cells_data)
     
@@ -422,7 +438,7 @@ if __name__ == "__main__":
     np.savetxt(ws.filename('cells', extension='csv'), source, header=header, delimiter=',', fmt='%s')
 
     # Voxelize detected cells
-    coordinates = np.array([source[n] for n in ['x','y','z']]).T;
+    coordinates = np.array([source[n] for n in ['xt','yt','zt']]).T;
     intensities = source['source'];
     
     voxelization_parameter = dict(
@@ -437,19 +453,6 @@ if __name__ == "__main__":
           )
 
     vox.voxelize(coordinates, sink=ws.filename('density', postfix='counts'), **voxelization_parameter);  
-
-    voxelization_parameter = dict(
-          shape = io.shape(annotation_upscaled),
-          dtype = None, 
-          weights = intensities,
-          method = 'sphere', 
-          radius = (3,3,3), 
-          kernel = None, 
-          processes = 16, 
-          verbose = True
-          )
-
-    vox.voxelize(coordinates, sink=ws.filename('density', postfix='intensities'), **voxelization_parameter);
         
     print("\nProcessing cell count results and registering annotation files...\n")
     
@@ -458,7 +461,7 @@ if __name__ == "__main__":
 
     register_annotation(directory, annotation_upscaled)
     
-    region_counts, region_volumes, region_densities = get_region_stats(num_regions, directory, region_ids, region_parent_ids, raw_x_res, raw_y_res, raw_z_res)
+    region_counts, region_volumes, region_densities = get_region_stats(num_regions, directory, region_ids, region_parent_ids, [raw_x_res, raw_y_res, raw_z_res])
     
     print("\nExporting cell count statistics...\n")
     
