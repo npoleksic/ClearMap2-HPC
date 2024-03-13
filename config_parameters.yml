@@ -49,7 +49,7 @@ equalization_save: false # true or false
 dog_filter: true # true or false
 dog_filter_shape: [5,5,5] # array or false
 dog_filter_sigma: [0.3] # array or false
-dog_filter_sigma2: [1] # 0.8 array or false
+dog_filter_sigma2: [0.8] # array or false
 dog_filter_save: false # true or false
 
 maxima_detection: true # true or false

@@ -52,6 +52,7 @@ import ClearMap.Visualization.Color as col
 
 from ClearMap.Alignment.utils import create_label_table
 
+from skimage import io
 
 ###############################################################################
 # ## Atlas Structures
@@ -530,7 +531,7 @@ def set_label_file(label_file, extra_label=None):
 
 # TODO:use parallel array processing and lut routines to speed up?
 
-def label_points(points, annotation_file=None, invalid=0, key='order', level=None):  # FIXME: document level
+def label_points(points, annotation_file=None, annotation_array=None, invalid=0, key='order', level=None):  # FIXME: document level
     """Label points according to the annotation in the labeled image file.
 
     Arguments
@@ -555,10 +556,16 @@ def label_points(points, annotation_file=None, invalid=0, key='order', level=Non
 
     n_points, n_spatial_dim = points.shape
 
-    atlas = clearmap_io.read(__get_module_annotation_file(annotation_file))
+    if annotation_array is not None:
+        atlas = annotation_array
+    else:
+        atlas = clearmap_io.read(__get_module_annotation_file(annotation_file))
+    # atlas = clearmap_io.as_source(__get_module_annotation_file(annotation_file))
+
     if atlas.dtype.kind == 'f':
         atlas = np.array(atlas, dtype=int)
 
+    print(atlas.shape)
     # Filter out of atlas coordinates
     points_int = np.asarray(points, dtype=int)
     valid = np.ones(n_points)
