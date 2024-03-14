@@ -560,12 +560,10 @@ def label_points(points, annotation_file=None, annotation_array=None, invalid=0,
         atlas = annotation_array
     else:
         atlas = clearmap_io.read(__get_module_annotation_file(annotation_file))
-    # atlas = clearmap_io.as_source(__get_module_annotation_file(annotation_file))
 
     if atlas.dtype.kind == 'f':
         atlas = np.array(atlas, dtype=int)
 
-    print(atlas.shape)
     # Filter out of atlas coordinates
     points_int = np.asarray(points, dtype=int)
     valid = np.ones(n_points)

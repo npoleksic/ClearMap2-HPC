@@ -386,7 +386,7 @@ if __name__ == "__main__":
     
     coordinates = np.array([source[c] for c in 'xyz']).T;
     
-    coordinates_transformed = transformation(coordinates);
+    coordinates_transformed = transformation(coordinates, align_channel_outdir, align_reference_outdir);
     
     # Annotate cells based on position in annotation image
     label = ano.label_points(coordinates_transformed, key='order', annotation_array=annotation_array);

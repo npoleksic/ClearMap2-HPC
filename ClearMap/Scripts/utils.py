@@ -118,7 +118,7 @@ def remove_universe(source):
     
     
     
-def transformation(coordinates):
+def transformation(coordinates, align_channel_outdir, align_reference_outdir):
 
     """Transforms detected cell coordinates onto atlas space
     
@@ -434,9 +434,9 @@ def upscale(directory, source_file, target_shape_file, output_file):
     
     # Initialization - set parameters
     source_mm = tiff.imread(source_file) 
-    src_x, src_y, src_z = source_mm.shape[2], \ # define the source resolution out of the source annotation file
+    src_x, src_y, src_z = source_mm.shape[2], \
                           source_mm.shape[1], \
-                          source_mm.shape[0]
+                          source_mm.shape[0] # define the source resolution out of the source annotation file
 
     if len(target_shape_file) != 0: # define the resolution for the target file either manuel or match a target file so the annotation can be used as overlay  
         target_image        = tiff.imread(os.path.join(directory, target_shape_file))
