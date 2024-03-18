@@ -40,13 +40,6 @@ import ClearMap.Analysis.Measurements.MaximaDetection as md
 import ClearMap.Analysis.Measurements.ShapeDetection as sd
 import ClearMap.Analysis.Measurements.MeasureExpression as me
 
-#import ClearMap.ImageProcessing.Filter.Rank as rnk
-
-#import ClearMap.ImageProcessing.LightsheetCorrection as lc
-#import ClearMap.ImageProcessing.Differentiation.Hessian as hes
-#import ClearMap.ImageProcessing.Binary.Filling as bf
-#import ClearMap.ImageProcessing.Binary.Smoothing as bs
-
 import ClearMap.Utils.Timer as tmr
 
 import ClearMap.Utils.HierarchicalDict as hdict
@@ -59,12 +52,12 @@ import ClearMap.Utils.HierarchicalDict as hdict
 default_cell_detection_parameter = dict( 
   #flatfield
   illumination_correction = dict(flatfield = None,
-                                  scaling = 'mean'),
+                                 scaling = 'mean'),
                        
   #background removal
   background_correction = dict(shape = (7,7),
                                form = 'Disk',
-                    save = False),
+                               save = False),
   
   #equalization
   equalization = None,

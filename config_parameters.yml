@@ -1,16 +1,16 @@
 # PATHS
-experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/sample_brain' # absolute path to the experimental data folder
-raw_data_path: 'cfos/16-09-36_TR1 640_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # relative path to the raw data from the experimental data folder
-autof_data_path: 'autof/15-12-07_TR1 autofluo_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # relative path to autofluorescence data from the experimental data folder 
+experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/emily_15_35_00' # absolute path to the experimental data folder
+raw_data_path: 'cfos/15-35-00_F01_063x_UltraII_C01_xyz-Table Z<Z,4>.ome.tif' # relative path to the raw data from the experimental data folder
+autof_data_path: 'autof/15-35-00_F01_063x_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # relative path to autofluorescence data from the experimental data folder 
 # NOTE: generalize image file names with tag (i.e. Z<Z,4> instead of Z0001, Z0002, etc.)
 
 # RESOLUTION
-raw_x_resolution: 3.77556 #resolution of the raw data in the x-direction
-raw_y_resolution: 3.77556 # resolution of the raw data in the y-direction
-raw_z_resolution: 3 # resolution of the raw data in the z-direction
-autof_x_resolution: 3.77556 # resolution of the autofluorescence data in the x-direction
-autof_y_resolution: 3.77556 # resolution of the autofluorescence data in the y-direction
-autof_z_resolution: 3 # resolution of the autofluorescence data in the z-direction
+raw_x_resolution: 4.79436 #resolution of the raw data in the x-direction
+raw_y_resolution: 4.79436 # resolution of the raw data in the y-direction
+raw_z_resolution: 5 # resolution of the raw data in the z-direction
+autof_x_resolution: 4.79436 # resolution of the autofluorescence data in the x-direction
+autof_y_resolution: 4.79436 # resolution of the autofluorescence data in the y-direction
+autof_z_resolution: 5 # resolution of the autofluorescence data in the z-direction
 
 # ATLAS SETUP
 # NOTE: to improve performance, ensure the following parameters closely align with the experimental data
@@ -22,14 +22,14 @@ atlas_x_min: 0 # minimum crop in x-direction (after atlas-matching)
 atlas_x_max: 'MAX' # maximum crop in x-direction
 atlas_y_min: 0 # minimum crop in y-direction
 atlas_y_max: 'MAX' # maximum crop in y-direction
-atlas_z_min: 100 # minimum crop in z-direction
-atlas_z_max: 326 # maximum crop in z-direction
+atlas_z_min: 142 # minimum crop in z-direction
+atlas_z_max: 340 # maximum crop in z-direction
 
 # CELL DETECTION PARAMETERS -> CHECK ORIGINAL CLEARMAP DOCUMENTATION FOR DETAILS 
 
 illumination_correction: true # true or false
-illumination_correction_flatfield: false #'flatfield.tif' # array, string, or false
-illumination_correction_background: false #'darkfield.tif' # array, string, or false
+illumination_correction_flatfield: false # array, string, or false
+illumination_correction_background: false # array, string, or false
 illumination_correction_scaling: 'max' # float, 'max', 'mean', or false
 illumination_correction_save: false # true or false
 
@@ -46,7 +46,7 @@ equalization_spacing: false # array or false
 equalization_interpolate: false # int or false
 equalization_save: false # true or false
 
-dog_filter: true # true or false
+dog_filter: false # true or false
 dog_filter_shape: [5,5,5] # array or false
 dog_filter_sigma: [0.3] # array or false
 dog_filter_sigma2: [0.8] # array or false
@@ -55,12 +55,12 @@ dog_filter_save: false # true or false
 maxima_detection: true # true or false
 maxima_detection_h_max: false # float or false
 maxima_detection_shape: 5 # int or false
-maxima_detection_threshold: 500 # float or false
+maxima_detection_threshold: 3500 # float or false
 maxima_detection_valid: true # true or false
 maxima_detection_save: false # true or false
 
 shape_detection: true # true or false
-shape_detection_threshold: 2500 # float or false
+shape_detection_threshold: 25000 # float or false
 shape_detection_save: false # true or false
 
 intensity_detection: true # true or false
