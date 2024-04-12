@@ -89,15 +89,6 @@ print("ClearMap.ImageProcessing.Filter.StructureElement Imported")
 import ClearMap.ImageProcessing.Differentiation as dif
 print("ClearMap.ImageProcessing.Differentiation Imported")
 
-import ClearMap.ImageProcessing.Skeletonization.Skeletonization as skl
-print("ClearMap.ImageProcessing.Skeletonization.Skeletonization Imported")
-
-import ClearMap.ImageProcessing.Skeletonization.SkeletonProcessing as skp
-print("ClearMap.ImageProcessing.Skeletonization.SkeletonProcessing Imported")
-
-import ClearMap.ImageProcessing.MachineLearning.VesselFilling.VesselFilling as vf
-print("ClearMap.ImageProcessing.MachineLearning.VesselFilling.VesselFilling Imported")
-
 #analysis
 import ClearMap.Analysis.Graphs.GraphGt as grp
 print("ClearMap.Analysis.Graphs.GraphGt Imported")
@@ -124,7 +115,7 @@ print("Environment import complete")
 ###############################################################################
 
 __all__ = ['sys', 'os', 'glob', 'np', 'plt', 'reload',
-           'settings', 'io', 'wsp', 'tfs', 'col', 'te', 'tmr',  
-           'bp', 'ap', 'ano', 'res', 'elx',
-           'clp', 'rnk', 'se', 'dif', 'skl', 'skp', 'vf',
-           'grp', 'gp', 'me', 'mr', 'vox', 'cells'];
+           'settings', 'io', 'wsp', 'tfs', 'col', 'te', 
+           'tmr', 'bp', 'ap', 'ano', 'res', 'elx', 'clp', 
+           'rnk', 'se', 'dif', 'grp', 'gp', 'me', 'mr', 
+           'vox', 'cells'];
