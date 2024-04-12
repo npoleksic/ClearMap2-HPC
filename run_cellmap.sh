@@ -52,7 +52,7 @@ else
     then
         echo -e "Creating conda environment from ClearMapHPC.yml..."
         echo "(This may take a few minutes)"
-        conda env create -f ClearMapHPC.yml -y
+        conda env create -f ClearMapHPC.yml
         echo "Environment successfully installed!"
         echo "Activating ClearMapHPC..."
         conda activate ClearMapHPC
