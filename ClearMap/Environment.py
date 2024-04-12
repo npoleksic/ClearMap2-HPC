@@ -73,9 +73,6 @@ print("ClearMap.Alignment.Resampling Imported")
 import ClearMap.Alignment.Elastix as elx
 print("ClearMap.Alignment.Elastix Imported")
 
-# import ClearMap.Alignment.Stitching.StitchingRigid as st
-# import ClearMap.Alignment.Stitching.StitchingWobbly as stw
-
 #image processing
 import ClearMap.ImageProcessing.Clipping.Clipping as clp
 print("ClearMap.ImageProcessing.Clipping.Clipping Imported")
