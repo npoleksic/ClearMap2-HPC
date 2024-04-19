@@ -56,7 +56,6 @@ print("ClearMap.Utils.TagExpression Imported")
 import ClearMap.Utils.Timer as tmr
 print("ClearMap.Utils.Timer Imported")
 
-
 import ClearMap.ParallelProcessing.BlockProcessing as bp
 print("ClearMap.ParallelProcessing.BlockProcessing Imported")
 

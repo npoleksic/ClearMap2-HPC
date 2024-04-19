@@ -38,7 +38,7 @@ fi
 eval "$(conda shell.bash hook)" # for activating conda environments
 echo -e "\nChecking for environment...\n"
 
-conda env list | grep -q "ClearMapHPC"
+conda info --envs | grep -q "ClearMapHPC"
 if [ $? -eq 0 ]; then
     echo "The conda environment \"ClearMapHPC\" already exists."
     echo "Activating ClearMapHPC..."
