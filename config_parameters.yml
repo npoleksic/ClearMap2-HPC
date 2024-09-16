@@ -1,29 +1,29 @@
 # PATHS
-experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/emily_15_35_00' # absolute path to the experimental data folder
-raw_data_path: 'cfos/15-35-00_F01_063x_UltraII_C01_xyz-Table Z<Z,4>.ome.tif' # relative path to the raw data from the experimental data folder
-autof_data_path: 'autof/15-35-00_F01_063x_UltraII_C00_xyz-Table Z<Z,4>.ome.tif' # relative path to autofluorescence data from the experimental data folder 
+experiment_path: '/home/emhagan/LSS/lss_sferri/FT1_CMv6' # absolute path to the experimental data folder
+raw_data_path: 'FT1_Registered/CTLS Capture - Pos 1 2 [1] 3DMontage Complete.crop.crop_XY1724784069_Z<Z,4>_T0_C1.tif' # relative path to the raw data from the experimental data folder
+autof_data_path: 'FT1_Registered/CTLS Capture - Pos 1 2 [1] 3DMontage Complete.crop.crop_XY1724784069_Z<Z,4>_T0_C0.tif' # relative path to autofluorescence data from the experimental data folder 
 # NOTE: generalize image file names with tag (i.e. Z<Z,4> instead of Z0001, Z0002, etc.)
 
 # RESOLUTION
-raw_x_resolution: 4.79436 #resolution of the raw data in the x-direction
-raw_y_resolution: 4.79436 # resolution of the raw data in the y-direction
-raw_z_resolution: 5 # resolution of the raw data in the z-direction
-autof_x_resolution: 4.79436 # resolution of the autofluorescence data in the x-direction
-autof_y_resolution: 4.79436 # resolution of the autofluorescence data in the y-direction
-autof_z_resolution: 5 # resolution of the autofluorescence data in the z-direction
+raw_x_resolution: 2.002 #resolution of the raw data in the x-direction
+raw_y_resolution: 2.002 # resolution of the raw data in the y-direction
+raw_z_resolution: 3 # resolution of the raw data in the z-direction
+autof_x_resolution: 2.002 # resolution of the autofluorescence data in the x-direction
+autof_y_resolution: 2.002 # resolution of the autofluorescence data in the y-direction
+autof_z_resolution: 3 # resolution of the autofluorescence data in the z-direction
 
 # ATLAS SETUP
 # NOTE: to improve performance, ensure the following parameters closely align with the experimental data
-x_orientation: 3 # atlas axis that matches experimental data x-axis
-y_orientation: 1 # atlas axis that matches experimental data y-axis
+x_orientation: 1 # atlas axis that matches experimental data x-axis
+y_orientation: 3 # atlas axis that matches experimental data y-axis
 z_orientation: 2 # atlas axis that matches experimental data z-axis
 # NOTE: orientations should be expressed as a 1, 2, or 3 corresponding to axes x, y, and z
 atlas_x_min: 0 # minimum crop in x-direction (after atlas-matching)
 atlas_x_max: 'MAX' # maximum crop in x-direction
 atlas_y_min: 0 # minimum crop in y-direction
 atlas_y_max: 'MAX' # maximum crop in y-direction
-atlas_z_min: 142 # minimum crop in z-direction
-atlas_z_max: 340 # maximum crop in z-direction
+atlas_z_min: 120 # minimum crop in z-direction
+atlas_z_max: 372 # maximum crop in z-direction
 
 # CELL DETECTION PARAMETERS -> CHECK ORIGINAL CLEARMAP DOCUMENTATION FOR DETAILS 
 
@@ -34,9 +34,9 @@ illumination_correction_scaling: 'max' # float, 'max', 'mean', or false
 illumination_correction_save: false # true or false
 
 background_correction: true # true or false
-background_correction_shape: [7,7] # 2-element array or false
+background_correction_shape: [15,15] # 2-element array or false
 background_correction_form: 'Disk' # 'Disk', 'Sphere', 'Cube', or false
-background_correction_save: false # true or false
+background_correction_save: true # true or false
 
 equalization: false # true or false
 equalization_percentile: false # 2-element array or false
@@ -54,24 +54,24 @@ dog_filter_save: false # true or false
 
 maxima_detection: true # true or false
 maxima_detection_h_max: false # float or false
-maxima_detection_shape: 5 # int or false
-maxima_detection_threshold: 3500 # float or false
+maxima_detection_shape: 9 # int or false
+maxima_detection_threshold: false # float or false
 maxima_detection_valid: true # true or false
 maxima_detection_save: false # true or false
 
 shape_detection: true # true or false
-shape_detection_threshold: 25000 # float or false
+shape_detection_threshold: 400 # float or false
 shape_detection_save: false # true or false
 
 intensity_detection: true # true or false
 intensity_detection_method: 'max' # 'max', 'min', 'mean', 'sum', or false
-intensity_detection_shape: 5 # int or false
+intensity_detection_shape: 9 # int or false
 intensity_detection_measure: true # true or false
 
 # MISC
 filter_size_min: 20 # minimum cell size to be counted
-filter_size_max: 'MAX' # maximum cell size to be counted
-filter_intensity_min: 4000 # minimum cell intensity to be counted
+filter_size_max: 10000 # maximum cell size to be counted
+filter_intensity_min: 0 # minimum cell intensity to be counted
 filter_intensity_max: 'MAX' # maximum cell intensity to be counted
-filter_distance_min: 7 # minimum pixel distance cells should be from each other
+filter_distance_min: 3 # minimum pixel distance cells should be from each other
 include_checkpoints: false # check progress during execution

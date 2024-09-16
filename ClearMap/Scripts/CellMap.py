@@ -21,11 +21,17 @@ if __name__ == "__main__":
     clearmap_path = sys.argv[1]
     sys.path.append(clearmap_path)
     
+    # Import supplementary ClearMap modules
+    from ClearMap.Environment import *
+    
     # Read parameters from YML file
     config = read_config('config_parameters.yml')
-    
+
     if config:
         directory = config.get('experiment_path')
+        
+        ws = wsp.Workspace('CellMap', directory=directory);
+
         expression_raw = config.get('raw_data_path')
         expression_auto = config.get('autof_data_path')
 
@@ -205,14 +211,10 @@ if __name__ == "__main__":
         if(filter_intensity_max == "MAX"):
             filter_intensity_max = None
             
-            
-    # Import supplementary ClearMap modules
-    from ClearMap.Environment import *
 
     # Initialize experimental environment
-    ws = wsp.Workspace('CellMap', directory=directory);
     ws.update(raw=expression_raw, autofluorescence=expression_auto)
-    ws.info()
+    # ws.info()
 
     ws.debug = False
 
@@ -418,7 +420,7 @@ if __name__ == "__main__":
     header = ', '.join([h for h in source.dtype.names]);
     source = remove_universe(source.array)
     source = np.flip(np.sort(source, order=['source']),axis=0)
-    source = remove_overlap(source, filter_distance_min) 
+    # source = remove_overlap(source, filter_distance_min) 
     source = np.sort(source, order=['z'])
     np.savetxt(ws.filename('cells', extension='csv'), source, header=header, delimiter=',', fmt='%s')
 
