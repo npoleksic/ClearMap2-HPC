@@ -213,7 +213,15 @@ if __name__ == "__main__":
             
 
     # Initialize experimental environment
-    ws.update(raw=expression_raw, autofluorescence=expression_auto)
+
+    cfos_npy = os.path.join(directory, 'cfos.npy')
+    autof_npy = os.path.join(directory, 'autofluorescence.npy')
+
+    io.convert(expression_raw, cfos_npy, processes=16, verbose=True);
+    io.convert(expression_auto, autof_npy, processes=16, verbose=True);
+
+    ws.update(raw=cfos_npy, autofluorescence=autof_npy)
+    # ws.update(raw=expression_raw, autofluorescence=expression_auto)
     # ws.info()
 
     ws.debug = False
