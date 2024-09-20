@@ -20,7 +20,7 @@ if __name__ == "__main__":
         sys.exit()
     clearmap_path = sys.argv[1]
     sys.path.append(clearmap_path)
-    
+    # clearmap_path = '/home/emhagan/ClearMap2-HPC'
     # Import supplementary ClearMap modules
     from ClearMap.Environment import *
     
@@ -32,8 +32,17 @@ if __name__ == "__main__":
         
         ws = wsp.Workspace('CellMap', directory=directory);
 
-        expression_raw = config.get('raw_data_path')
-        expression_auto = config.get('autof_data_path')
+        raw_fn = config.get('raw_data_path')
+        autof_fn = config.get('autof_data_path')
+        expression_raw = raw_fn + '.npy'
+        expression_auto = autof_fn + '.npy'
+        raw_tiff = os.path.join(directory, raw_fn + '.tif')
+        autof_tiff = os.path.join(directory, autof_fn + '.tif')
+        np.save(os.path.join(directory, expression_raw), np.transpose(tiff.imread(raw_tiff), (2,1,0)))
+        np.save(os.path.join(directory, expression_auto), np.transpose(tiff.imread(autof_tiff), (2,1,0)))
+
+        # expression_raw = config.get('raw_data_path')
+        # expression_auto = config.get('autof_data_path')
 
         raw_x_res = config.get('raw_x_resolution')
         raw_y_res = config.get('raw_y_resolution')
@@ -214,16 +223,18 @@ if __name__ == "__main__":
 
     # Initialize experimental environment
 
-    cfos_npy = os.path.join(directory, 'cfos.npy')
-    autof_npy = os.path.join(directory, 'autofluorescence.npy')
 
-    io.convert(expression_raw, cfos_npy, processes=16, verbose=True);
-    io.convert(expression_auto, autof_npy, processes=16, verbose=True);
+    ws.update(raw=expression_raw, autofluorescence=expression_auto)
+    ws.info()
 
-    ws.update(raw=cfos_npy, autofluorescence=autof_npy)
-    # ws.update(raw=expression_raw, autofluorescence=expression_auto)
-    # ws.info()
+    
+    # io.convert(ws.filename('raw'), cfos_npy, processes=16, verbose=True);
+    # io.convert(ws.filename('autofluorescence'), autof_npy, processes=16, verbose=True);
+    # cfos_npy = os.path.join(directory, 'cfos.npy')
+    # autof_npy = os.path.join(directory, 'autofluorescence.npy')
+    # ws.update(raw=cfos_npy, autofluorescence=autof_npy)   
 
+    
     ws.debug = False
 
     resources_directory = settings.resources_path
@@ -262,12 +273,13 @@ if __name__ == "__main__":
     io.convert(ws.filename('autofluorescence'), autof, processes = 16, verbose=True)
     
     # Upscale reference atlas and annotation atlas to match data size
-    upscale(directory, reference_file, autof, 'reference_upscaled.tif')
-    annotation_array = np.transpose(upscale(directory, annotation_file, autof, 'annotation_upscaled.tif'), (2,1,0))
+    upscale(directory, reference_file, autof_tiff, 'reference_upscaled.tif')
+    annotation_array = upscale(directory, annotation_file, autof_tiff, 'annotation_upscaled.tif')
+    # annotation_array = np.transpose(upscale(directory, annotation_file, ws.filename('autofluorescence'), 'annotation_upscaled.tif'), (2,1,0))
     
     # Align autofluorescent image to cfos image
     align_channels_parameter = {            
-        "processes" : 16,
+        "processes" : 8,
         "moving_image" : autof,
         "fixed_image"  : cfos,
         "affine_parameter_file"  : align_channels_affine_file,
@@ -279,7 +291,7 @@ if __name__ == "__main__":
 
     # Align reference image to autfluorescent image
     align_reference_parameter = {            
-        "processes" : 16,
+        "processes" : 8,
         "moving_image" : os.path.join(directory, 'reference_upscaled.tif'),
         "fixed_image"  : autof,
         "affine_parameter_file"  :  align_reference_affine_file,
@@ -289,8 +301,8 @@ if __name__ == "__main__":
 
     elx.align(**align_reference_parameter);
     
-    os.remove(autof)
-    os.remove(cfos)
+    # os.remove(autof)
+    # os.remove(cfos)
     
     if checkpoints:
         print("\nALIGNMENT CHECKPOINT")

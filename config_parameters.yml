@@ -1,7 +1,7 @@
 # PATHS
-experiment_path: '/home/emhagan/LSS/lss_sferri/FT1_CMv6' # absolute path to the experimental data folder
-raw_data_path: 'FT1_Registered/CTLS Capture - Pos 1 2 [1] 3DMontage Complete.crop.crop_XY1724784069_Z<Z,4>_T0_C1.tif' # relative path to the raw data from the experimental data folder
-autof_data_path: 'FT1_Registered/CTLS Capture - Pos 1 2 [1] 3DMontage Complete.crop.crop_XY1724784069_Z<Z,4>_T0_C0.tif' # relative path to autofluorescence data from the experimental data folder 
+experiment_path: '/home/emhagan/LSS/lss_sferri/FT1_CMv7' # absolute path to the experimental data folder
+raw_data_path: 'FT1_cfos' # relative path to the raw data from the experimental data folder
+autof_data_path: 'FT1_autof' # relative path to autofluorescence data from the experimental data folder 
 # NOTE: generalize image file names with tag (i.e. Z<Z,4> instead of Z0001, Z0002, etc.)
 
 # RESOLUTION
@@ -36,7 +36,7 @@ illumination_correction_save: false # true or false
 background_correction: true # true or false
 background_correction_shape: [15,15] # 2-element array or false
 background_correction_form: 'Disk' # 'Disk', 'Sphere', 'Cube', or false
-background_correction_save: true # true or false
+background_correction_save: false # true or false
 
 equalization: false # true or false
 equalization_percentile: false # 2-element array or false
