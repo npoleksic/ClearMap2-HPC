@@ -20,14 +20,39 @@ if __name__ == "__main__":
         sys.exit()
     clearmap_path = sys.argv[1]
     sys.path.append(clearmap_path)
+    # clearmap_path = '/home/npoleksic/ClearMap2-HPC'
+    # Import supplementary ClearMap modules
+    from ClearMap.Environment import *
     
     # Read parameters from YML file
     config = read_config('config_parameters.yml')
-    
+
     if config:
         directory = config.get('experiment_path')
-        expression_raw = config.get('raw_data_path')
-        expression_auto = config.get('autof_data_path')
+        
+        ws = wsp.Workspace('CellMap', directory=directory);
+
+        filetype = config.get('file_type')
+        if filetype == "tiff_folder" or filetype == "npy":
+            expression_raw = config.get('raw_data_path')
+            expression_auto = config.get('autof_data_path')
+        elif filetype == "tiff":
+            raw_fn = config.get('raw_data_name')
+            autof_fn = config.get('autof_data_name')
+            
+            expression_raw = raw_fn.split('.')[0] + '.npy'
+            expression_auto = autof_fn.split('.')[0] + '.npy'
+            
+            print("\nConverting input files to .npy ...\n")
+
+            cfos_tiff = os.path.join(directory, raw_fn)
+            autof_tiff = os.path.join(directory, autof_fn)
+            
+            np.save(os.path.join(directory, expression_raw), np.transpose(tiff.imread(cfos_tiff), (2,1,0)))
+            np.save(os.path.join(directory, expression_auto), np.transpose(tiff.imread(autof_tiff), (2,1,0)))
+            
+        # expression_raw = config.get('raw_data_path')
+        # expression_auto = config.get('autof_data_path')
 
         raw_x_res = config.get('raw_x_resolution')
         raw_y_res = config.get('raw_y_resolution')
@@ -205,15 +230,11 @@ if __name__ == "__main__":
         if(filter_intensity_max == "MAX"):
             filter_intensity_max = None
             
-            
-    # Import supplementary ClearMap modules
-    from ClearMap.Environment import *
 
     # Initialize experimental environment
-    ws = wsp.Workspace('CellMap', directory=directory);
+
     ws.update(raw=expression_raw, autofluorescence=expression_auto)
     ws.info()
-
     ws.debug = False
 
     resources_directory = settings.resources_path
@@ -234,13 +255,17 @@ if __name__ == "__main__":
     print("\nResampling and aligning channels...\n")
 
     # Convert raw image stack to NumPy array
-    source = ws.source('raw');
-    sink   = ws.filename('stitched')
-    io.delete_file(sink)
-    io.convert(source, sink, processes=16, verbose=True);
-
-    cfos = os.path.join(directory, 'cfos.tif')
-    autof = os.path.join(directory, 'autofluorescence.tif')
+    
+    if filetype == "tiff_folder":
+        source = ws.source('raw');
+        sink   = ws.filename('stitched')
+        io.delete_file(sink)
+        io.convert(source, sink, processes=64, verbose=True);
+    else:
+        ws.update(stitched=expression_raw)
+        
+    cfos = os.path.join(directory, expression_raw.split('.')[0] + '_conv.tif')
+    autof = os.path.join(directory, expression_auto.split('.')[0] + '_conv.tif')
     
     annotation_upscaled = os.path.join(directory, 'annotation_upscaled.tif')
     
@@ -248,18 +273,38 @@ if __name__ == "__main__":
     align_reference_outdir = os.path.join(directory, 'elastix_auto_to_reference')
     
     # Convert raw and autof file lists to single tiff files
-    io.convert(ws.filename('raw'), cfos, processes = 16, verbose=True)
-    io.convert(ws.filename('autofluorescence'), autof, processes = 16, verbose=True)
+    # io.convert(ws.filename('raw'), cfos, processes = 32, verbose=True)
+    # io.convert(ws.filename('autofluorescence'), autof, processes = 32, verbose=True)
     
-    # Upscale reference atlas and annotation atlas to match data size
-    upscale(directory, reference_file, autof, 'reference_upscaled.tif')
-    annotation_array = np.transpose(upscale(directory, annotation_file, autof, 'annotation_upscaled.tif'), (2,1,0))
+    # # Upscale reference atlas and annotation atlas to match data size
+    # upscale(directory, reference_file, autof, 'reference_upscaled.tif')
+    # annotation_array = np.transpose(upscale(directory, annotation_file, autof, 'annotation_upscaled.tif'), (2,1,0))
     
+    resample_parameter = {
+        "source_resolution" : (raw_x_res,raw_y_res,raw_z_res),
+        "sink_resolution"   : (25,25,25),
+        "processes" : 64,
+        "verbose" : True,             
+        };    
+
+    io.delete_file(ws.filename('resampled'))
+
+    res.resample(ws.filename('stitched'), sink=ws.filename('resampled'), **resample_parameter)
+
+    resample_parameter_auto = {
+        "source_resolution" : (autof_x_res,autof_y_res,autof_z_res),
+        "sink_resolution"   : (25,25,25),
+        "processes" : 64,
+        "verbose" : True,                
+        };   
+
+    res.resample(ws.filename('autofluorescence'), sink=ws.filename('resampled', postfix='autofluorescence'), **resample_parameter_auto)
+
     # Align autofluorescent image to cfos image
     align_channels_parameter = {            
-        "processes" : 16,
-        "moving_image" : autof,
-        "fixed_image"  : cfos,
+        "processes" : 64,
+        "moving_image" : ws.filename('resampled', postfix='autofluorescence'),
+        "fixed_image"  : ws.filename('resampled'),
         "affine_parameter_file"  : align_channels_affine_file,
         "bspline_parameter_file" : None,
         "result_directory" : align_channel_outdir
@@ -269,9 +314,9 @@ if __name__ == "__main__":
 
     # Align reference image to autfluorescent image
     align_reference_parameter = {            
-        "processes" : 16,
-        "moving_image" : os.path.join(directory, 'reference_upscaled.tif'),
-        "fixed_image"  : autof,
+        "processes" : 64,
+        "moving_image" : reference_file,
+        "fixed_image"  : ws.filename('resampled', postfix='autofluorescence'),
         "affine_parameter_file"  :  align_reference_affine_file,
         "bspline_parameter_file" :  align_reference_bspline_file,
         "result_directory" : align_reference_outdir
@@ -352,7 +397,7 @@ if __name__ == "__main__":
         
     processing_parameter = cells.default_cell_detection_processing_parameter.copy();
     processing_parameter.update(
-        processes = 12,
+        processes = 64,
         size_max = 45,
         size_min = 20,
         overlap  = 10,
@@ -383,13 +428,12 @@ if __name__ == "__main__":
                        thresholds=thresholds); 
 
     source = ws.source('cells', postfix='filtered')
-    
     coordinates = np.array([source[c] for c in 'xyz']).T;
-    
-    coordinates_transformed = transformation(coordinates, align_channel_outdir, align_reference_outdir);
+
+    coordinates_transformed = transformation(coordinates, align_channel_outdir, align_reference_outdir, workspace=ws);
     
     # Annotate cells based on position in annotation image
-    label = ano.label_points(coordinates_transformed, key='order', annotation_array=annotation_array);
+    label = ano.label_points(coordinates_transformed, key='order', annotation_file=annotation_file);
     names = ano.convert_label(label, key='order', value='name');
     ID = ano.convert_label(label, key='order', value='id');
     parent_ID = ano.convert_label(label, key='order', value='parent_structure_id');
@@ -418,39 +462,43 @@ if __name__ == "__main__":
     header = ', '.join([h for h in source.dtype.names]);
     source = remove_universe(source.array)
     source = np.flip(np.sort(source, order=['source']),axis=0)
-    source = remove_overlap(source, filter_distance_min) 
+    # source = remove_overlap(source, filter_distance_min) 
     source = np.sort(source, order=['z'])
     np.savetxt(ws.filename('cells', extension='csv'), source, header=header, delimiter=',', fmt='%s')
 
     print("\nBeginning cell voxelization...\n")
     # Voxelize detected cells
     coordinates = np.array([source[n] for n in ['xt','yt','zt']]).T;
-    intensities = source['source'];
+    # intensities = source['source'];
     
-    voxelization_parameter = dict(
-          shape = io.shape(annotation_upscaled), 
-          dtype = None, 
-          weights = None,
-          method = 'sphere', 
-          radius = (3,3,3), 
-          kernel = None, 
-          processes = 16, 
-          verbose = True
-          )
+    # voxelization_parameter = dict(
+    #       shape = io.shape(annotation_upscaled), 
+    #       dtype = None, 
+    #       weights = None,
+    #       method = 'sphere', 
+    #       radius = (3,3,3), 
+    #       kernel = None, 
+    #       processes = 16, 
+    #       verbose = True
+    #       )
 
-    vox.voxelize(coordinates, sink=ws.filename('density', postfix='counts'), **voxelization_parameter);  
+    # vox.voxelize(coordinates, sink=ws.filename('density', postfix='counts'), **voxelization_parameter);  
         
     print("\nProcessing cell count results and registering annotation files...\n")
     
     # Obtain and export region-specific detection results
     num_regions, region_names, region_acronyms, region_ids, region_parent_ids, region_children = get_region_info(os.path.join(clearmap_path, 'ClearMap/Resources/Atlas/annotations_reform.json'))
 
-    register_annotation(directory, annotation_upscaled)
+    register_annotation(directory, annotation_file)
     
-    region_counts, region_volumes, region_densities = get_region_stats(num_regions, directory, region_ids, region_parent_ids, [raw_x_res, raw_y_res, raw_z_res])
+    region_counts, region_volumes, region_densities = get_region_stats(num_regions, directory, region_ids, region_parent_ids, [25,25,25])
     
     print("\nExporting cell count statistics...\n")
     
     export_regions(num_regions, region_names, region_acronyms, region_ids, region_parent_ids, region_children, region_volumes, region_counts, region_densities, directory)
+
+    os.remove(ws.filename('stitched'))
+    os.remove(ws.filename('cells', postfix='raw'))
+    # os.remove(ws.filename('cells', postfix='filtered'))
     
     print("CellMap Pipeline Complete!")

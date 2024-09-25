@@ -118,7 +118,7 @@ def remove_universe(source):
     
     
     
-def transformation(coordinates, align_channel_outdir, align_reference_outdir):
+def transformation(coordinates, align_channel_outdir, align_reference_outdir, workspace=None):
 
     """Transforms detected cell coordinates onto atlas space
     
@@ -133,6 +133,16 @@ def transformation(coordinates, align_channel_outdir, align_reference_outdir):
     """    
     
     import ClearMap.Alignment.Elastix as elx
+
+    
+    if workspace is not None:
+        import ClearMap.Alignment.Resampling as res
+        import ClearMap.IO.IO as io
+        ws = workspace
+        coordinates = res.resample_points(
+                        coordinates, sink=None, orientation=None, 
+                        source_shape=io.shape(ws.filename('stitched')), 
+                        sink_shape=io.shape(ws.filename('resampled')));
     
     coordinates = elx.transform_points(
                     coordinates, sink=None, 
