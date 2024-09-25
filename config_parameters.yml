@@ -1,7 +1,7 @@
 # PATHS
 experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/emilyCM2' # absolute path to the experimental data folder
-raw_data_name: 'FT1_cfos.npy' # relative path to the raw data from the experimental data folder
-autof_data_name: 'FT1_autof.npy' # relative path to autofluorescence data from the experimental data folder 
+raw_data_path: 'FT1_cfos.npy' # relative path to the raw data from the experimental data folder
+autof_data_path: 'FT1_autof.npy' # relative path to autofluorescence data from the experimental data folder 
 file_type: 'npy' # 'npy', 'tiff', or 'tiff_folder'
 # NOTE: generalize image file names with tag (i.e. Z<Z,4> instead of Z0001, Z0002, etc.)
 
