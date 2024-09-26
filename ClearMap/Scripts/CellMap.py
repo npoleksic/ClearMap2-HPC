@@ -29,16 +29,17 @@ if __name__ == "__main__":
 
     if config:
         directory = config.get('experiment_path')
-        
-        ws = wsp.Workspace('CellMap', directory=directory);
+        shutil.copy('config_parameters.yml', directory)
+
+        ws = wsp.Workspace('CellMap', directory=directory)
 
         filetype = config.get('file_type')
         if filetype == "tiff_folder" or filetype == "npy":
             expression_raw = config.get('raw_data_path')
             expression_auto = config.get('autof_data_path')
         elif filetype == "tiff":
-            raw_fn = config.get('raw_data_name')
-            autof_fn = config.get('autof_data_name')
+            raw_fn = config.get('raw_data_path')
+            autof_fn = config.get('autof_data_path')
             
             expression_raw = raw_fn.split('.')[0] + '.npy'
             expression_auto = autof_fn.split('.')[0] + '.npy'
@@ -217,7 +218,7 @@ if __name__ == "__main__":
         if not intensity_measure:
             intensity_measure = None
         else:
-            intensity_measure = ['source'];
+            intensity_measure = ['source']
         
         filter_size_min = config.get('filter_size_min')
         filter_size_max = config.get('filter_size_max')
@@ -257,17 +258,17 @@ if __name__ == "__main__":
     # Convert raw image stack to NumPy array
     
     if filetype == "tiff_folder":
-        source = ws.source('raw');
+        source = ws.source('raw')
         sink   = ws.filename('stitched')
         io.delete_file(sink)
-        io.convert(source, sink, processes=64, verbose=True);
+        io.convert(source, sink, processes=32, verbose=True)
     else:
         ws.update(stitched=expression_raw)
         
-    cfos = os.path.join(directory, expression_raw.split('.')[0] + '_conv.tif')
-    autof = os.path.join(directory, expression_auto.split('.')[0] + '_conv.tif')
+    # cfos = os.path.join(directory, expression_raw.split('.')[0] + '_conv.tif')
+    # autof = os.path.join(directory, expression_auto.split('.')[0] + '_conv.tif')
     
-    annotation_upscaled = os.path.join(directory, 'annotation_upscaled.tif')
+    # annotation_upscaled = os.path.join(directory, 'annotation_upscaled.tif')
     
     align_channel_outdir = os.path.join(directory, 'elastix_raw_to_auto')
     align_reference_outdir = os.path.join(directory, 'elastix_auto_to_reference')
@@ -283,7 +284,7 @@ if __name__ == "__main__":
     resample_parameter = {
         "source_resolution" : (raw_x_res,raw_y_res,raw_z_res),
         "sink_resolution"   : (25,25,25),
-        "processes" : 64,
+        "processes" : 32,
         "verbose" : True,             
         };    
 
@@ -294,7 +295,7 @@ if __name__ == "__main__":
     resample_parameter_auto = {
         "source_resolution" : (autof_x_res,autof_y_res,autof_z_res),
         "sink_resolution"   : (25,25,25),
-        "processes" : 64,
+        "processes" : 32,
         "verbose" : True,                
         };   
 
@@ -310,7 +311,7 @@ if __name__ == "__main__":
         "result_directory" : align_channel_outdir
         }; 
 
-    elx.align(**align_channels_parameter);
+    elx.align(**align_channels_parameter)
 
     # Align reference image to autfluorescent image
     align_reference_parameter = {            
@@ -322,10 +323,10 @@ if __name__ == "__main__":
         "result_directory" : align_reference_outdir
         };
 
-    elx.align(**align_reference_parameter);
+    elx.align(**align_reference_parameter)
     
-    os.remove(autof)
-    os.remove(cfos)
+    # os.remove(autof)
+    # os.remove(cfos)
     
     if checkpoints:
         print("\nALIGNMENT CHECKPOINT")
@@ -338,7 +339,7 @@ if __name__ == "__main__":
     print("\nDetecting cells...\n")
 
     # Setup cell detection parameters
-    cell_detection_parameter = cells.default_cell_detection_parameter.copy();
+    cell_detection_parameter = cells.default_cell_detection_parameter.copy()
 
     if illumination:
         cell_detection_parameter['illumination_correction']['flatfield'] = illumination_flatfield
@@ -395,9 +396,9 @@ if __name__ == "__main__":
     else:
         cell_detection_parameter['intensity_detection'] = None
         
-    processing_parameter = cells.default_cell_detection_processing_parameter.copy();
+    processing_parameter = cells.default_cell_detection_processing_parameter.copy()
     processing_parameter.update(
-        processes = 64,
+        processes = 16,
         size_max = 45,
         size_min = 20,
         overlap  = 10,
@@ -428,21 +429,21 @@ if __name__ == "__main__":
                        thresholds=thresholds); 
 
     source = ws.source('cells', postfix='filtered')
-    coordinates = np.array([source[c] for c in 'xyz']).T;
+    coordinates = np.array([source[c] for c in 'xyz']).T
 
-    coordinates_transformed = transformation(coordinates, align_channel_outdir, align_reference_outdir, workspace=ws);
+    coordinates_transformed = transformation(coordinates, align_channel_outdir, align_reference_outdir, workspace=ws)
     
     # Annotate cells based on position in annotation image
-    label = ano.label_points(coordinates_transformed, key='order', annotation_file=annotation_file);
-    names = ano.convert_label(label, key='order', value='name');
-    ID = ano.convert_label(label, key='order', value='id');
-    parent_ID = ano.convert_label(label, key='order', value='parent_structure_id');
+    label = ano.label_points(coordinates_transformed, key='order', annotation_file=annotation_file)
+    names = ano.convert_label(label, key='order', value='name')
+    ID = ano.convert_label(label, key='order', value='id')
+    parent_ID = ano.convert_label(label, key='order', value='parent_structure_id')
 
     coordinates_transformed.dtype=[(t,float) for t in ('xt','yt','zt')]
-    label = np.array(label, dtype=[('order', int)]);
+    label = np.array(label, dtype=[('order', int)])
     names = np.array(names, dtype=[('name', 'U256')])
-    ID = np.array(ID, dtype=[('id', int)]);
-    parent_ID = np.array(parent_ID, dtype=[('parent_structure_id', 'U256')]);
+    ID = np.array(ID, dtype=[('id', int)])
+    parent_ID = np.array(parent_ID, dtype=[('parent_structure_id', 'U256')])
 
     import numpy.lib.recfunctions as rfn
 
@@ -458,8 +459,8 @@ if __name__ == "__main__":
     print("\nRemoving invalid cells and exporting detected cell data...\n")
     
     # Remove invalid and overlapping cells. Export corrected cell data to CSV
-    source = ws.source('cells');
-    header = ', '.join([h for h in source.dtype.names]);
+    source = ws.source('cells')
+    header = ', '.join([h for h in source.dtype.names])
     source = remove_universe(source.array)
     source = np.flip(np.sort(source, order=['source']),axis=0)
     # source = remove_overlap(source, filter_distance_min) 
@@ -468,8 +469,8 @@ if __name__ == "__main__":
 
     print("\nBeginning cell voxelization...\n")
     # Voxelize detected cells
-    coordinates = np.array([source[n] for n in ['xt','yt','zt']]).T;
-    # intensities = source['source'];
+    coordinates = np.array([source[n] for n in ['xt','yt','zt']]).T
+    # intensities = source['source']
     
     # voxelization_parameter = dict(
     #       shape = io.shape(annotation_upscaled), 
@@ -482,7 +483,7 @@ if __name__ == "__main__":
     #       verbose = True
     #       )
 
-    # vox.voxelize(coordinates, sink=ws.filename('density', postfix='counts'), **voxelization_parameter);  
+    # vox.voxelize(coordinates, sink=ws.filename('density', postfix='counts'), **voxelization_parameter)
         
     print("\nProcessing cell count results and registering annotation files...\n")
     
@@ -497,7 +498,7 @@ if __name__ == "__main__":
     
     export_regions(num_regions, region_names, region_acronyms, region_ids, region_parent_ids, region_children, region_volumes, region_counts, region_densities, directory)
 
-    os.remove(ws.filename('stitched'))
+    # os.remove(ws.filename('stitched'))
     os.remove(ws.filename('cells', postfix='raw'))
     # os.remove(ws.filename('cells', postfix='filtered'))
     

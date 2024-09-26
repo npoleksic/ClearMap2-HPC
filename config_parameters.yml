@@ -1,5 +1,5 @@
 # PATHS
-experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/emilyCM2' # absolute path to the experimental data folder
+experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/FT1' # absolute path to the experimental data folder
 raw_data_path: 'FT1_cfos.npy' # relative path to the raw data from the experimental data folder
 autof_data_path: 'FT1_autof.npy' # relative path to autofluorescence data from the experimental data folder 
 file_type: 'npy' # 'npy', 'tiff', or 'tiff_folder'
@@ -35,7 +35,7 @@ illumination_correction_scaling: 'max' # float, 'max', 'mean', or false
 illumination_correction_save: false # true or false
 
 background_correction: true # true or false
-background_correction_shape: [15,15] # 2-element array or false
+background_correction_shape: [17,17] # 2-element array or false
 background_correction_form: 'Disk' # 'Disk', 'Sphere', 'Cube', or false
 background_correction_save: false # true or false
 
@@ -56,7 +56,7 @@ dog_filter_save: false # true or false
 maxima_detection: true # true or false
 maxima_detection_h_max: false # float or false
 maxima_detection_shape: 9 # int or false
-maxima_detection_threshold: 400 # float or false
+maxima_detection_threshold: false # float or false
 maxima_detection_valid: true # true or false
 maxima_detection_save: false # true or false
 
@@ -70,9 +70,9 @@ intensity_detection_shape: 9 # int or false
 intensity_detection_measure: true # true or false
 
 # MISC
-filter_size_min: 20 # minimum cell size to be counted
+filter_size_min: 10 # minimum cell size to be counted
 filter_size_max: 'MAX' # maximum cell size to be counted
-filter_intensity_min: 500 # minimum cell intensity to be counted
+filter_intensity_min: 350 # minimum cell intensity to be counted
 filter_intensity_max: 'MAX' # maximum cell intensity to be counted
 filter_distance_min: 3 # minimum pixel distance cells should be from each other
 include_checkpoints: false # check progress during execution
