@@ -280,7 +280,7 @@ if __name__ == "__main__":
     # # Upscale reference atlas and annotation atlas to match data size
     # upscale(directory, reference_file, autof, 'reference_upscaled.tif')
     # annotation_array = np.transpose(upscale(directory, annotation_file, autof, 'annotation_upscaled.tif'), (2,1,0))
-    
+    #!!!!!!!!!!!!!!!!!!!!!!!!!
     resample_parameter = {
         "source_resolution" : (raw_x_res,raw_y_res,raw_z_res),
         "sink_resolution"   : (25,25,25),
@@ -324,10 +324,11 @@ if __name__ == "__main__":
         };
 
     elx.align(**align_reference_parameter)
-    
+    #!!!!!!!!!!!!!!!!!!!!!
+
     # os.remove(autof)
     # os.remove(cfos)
-    
+
     if checkpoints:
         print("\nALIGNMENT CHECKPOINT")
         print("\nFrom the newly generated files in your experimental directory, compare: ")
@@ -335,9 +336,7 @@ if __name__ == "__main__":
         print("\t - autofluorescence data to elastix_auto_to_reference/result.1.mhd")
         print("Ensure the files are properly aligned in shape and slicing")
         checkpoint()
-
     print("\nDetecting cells...\n")
-
     # Setup cell detection parameters
     cell_detection_parameter = cells.default_cell_detection_parameter.copy()
 
@@ -398,7 +397,7 @@ if __name__ == "__main__":
         
     processing_parameter = cells.default_cell_detection_processing_parameter.copy()
     processing_parameter.update(
-        processes = 16,
+        processes = 12,
         size_max = 45,
         size_min = 20,
         overlap  = 10,
@@ -417,6 +416,8 @@ if __name__ == "__main__":
     print("\nFiltering and annotating cells...\n")
 
     # Filter cells for size and intensity
+    #!!!!!!!!!!!!!!!!!!!!!
+
     source = ws.source('cells', postfix='raw')
 
     thresholds = {
@@ -467,7 +468,7 @@ if __name__ == "__main__":
     source = np.sort(source, order=['z'])
     np.savetxt(ws.filename('cells', extension='csv'), source, header=header, delimiter=',', fmt='%s')
 
-    print("\nBeginning cell voxelization...\n")
+    # print("\nBeginning cell voxelization...\n")
     # Voxelize detected cells
     coordinates = np.array([source[n] for n in ['xt','yt','zt']]).T
     # intensities = source['source']

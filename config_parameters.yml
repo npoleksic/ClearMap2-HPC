@@ -23,19 +23,19 @@ atlas_x_min: 0 # minimum crop in x-direction (after atlas-matching)
 atlas_x_max: 'MAX' # maximum crop in x-direction
 atlas_y_min: 0 # minimum crop in y-direction
 atlas_y_max: 'MAX' # maximum crop in y-direction
-atlas_z_min: 120 # minimum crop in z-direction
+atlas_z_min: 110 # minimum crop in z-direction
 atlas_z_max: 372 # maximum crop in z-direction
 
-# CELL DETECTION PARAMETERS -> CHECK ORIGINAL CLEARMAP DOCUMENTATION FOR DETAILS 
+# CELL DETECTION PARAMETERS -> CHECK ClearMap/ImageProcessing/Cells.py @detect_cells for documentation 
 
-illumination_correction: true # true or false
-illumination_correction_flatfield: false # array, string, or false
+illumination_correction: false # true or false
+illumination_correction_flatfield: 'flatfield.tif' # array, string, or false
 illumination_correction_background: false # array, string, or false
 illumination_correction_scaling: 'max' # float, 'max', 'mean', or false
 illumination_correction_save: false # true or false
 
 background_correction: true # true or false
-background_correction_shape: [17,17] # 2-element array or false
+background_correction_shape: [19,19] # 2-element array or false
 background_correction_form: 'Disk' # 'Disk', 'Sphere', 'Cube', or false
 background_correction_save: false # true or false
 
@@ -48,15 +48,15 @@ equalization_interpolate: false # int or false
 equalization_save: false # true or false
 
 dog_filter: false # true or false
-dog_filter_shape: [5,5,5] # array or false
-dog_filter_sigma: [0.3] # array or false
-dog_filter_sigma2: [0.8] # array or false
+dog_filter_shape: [7,7,7] # array or false
+dog_filter_sigma: [1] # array or false
+dog_filter_sigma2: [4] # array or false
 dog_filter_save: false # true or false
 
 maxima_detection: true # true or false
 maxima_detection_h_max: false # float or false
-maxima_detection_shape: 9 # int or false
-maxima_detection_threshold: false # float or false
+maxima_detection_shape: 7 # int or false
+maxima_detection_threshold: 150 # float or false
 maxima_detection_valid: true # true or false
 maxima_detection_save: false # true or false
 
@@ -66,13 +66,13 @@ shape_detection_save: false # true or false
 
 intensity_detection: true # true or false
 intensity_detection_method: 'max' # 'max', 'min', 'mean', 'sum', or false
-intensity_detection_shape: 9 # int or false
+intensity_detection_shape: 7 # int or false
 intensity_detection_measure: true # true or false
 
 # MISC
 filter_size_min: 10 # minimum cell size to be counted
-filter_size_max: 'MAX' # maximum cell size to be counted
-filter_intensity_min: 350 # minimum cell intensity to be counted
-filter_intensity_max: 'MAX' # maximum cell intensity to be counted
+filter_size_max: 15000 # maximum cell size to be counted
+filter_intensity_min: 300 # minimum cell intensity to be counted
+filter_intensity_max: 20000 # maximum cell intensity to be counted
 filter_distance_min: 3 # minimum pixel distance cells should be from each other
 include_checkpoints: false # check progress during execution
