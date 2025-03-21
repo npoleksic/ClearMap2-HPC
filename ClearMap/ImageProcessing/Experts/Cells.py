@@ -589,9 +589,9 @@ def remove_background(source, shape, form = 'Disk'):
   selem = se.structure_element(shape, form=form, ndim=2).astype('uint8');
   removed = np.empty(source.shape, dtype=source.dtype);
   for z in range(source.shape[2]):
-    #img[:,:,z] = img[:,:,z] - grey_opening(img[:,:,z], structure = structureElement('Disk', (30,30)));
-    #img[:,:,z] = img[:,:,z] - morph.grey_opening(img[:,:,z], structure = self.structureELement('Disk', (150,150)));
-    # removed[:,:,z] = source[:,:,z] - cv2.morphologyEx(source[:,:,z], cv2.MORPH_OPEN, selem)
+  #   #img[:,:,z] = img[:,:,z] - grey_opening(img[:,:,z], structure = structureElement('Disk', (30,30)));
+  #   #img[:,:,z] = img[:,:,z] - morph.grey_opening(img[:,:,z], structure = self.structureELement('Disk', (150,150)));
+  #   # removed[:,:,z] = source[:,:,z] - cv2.morphologyEx(source[:,:,z], cv2.MORPH_OPEN, selem)
     removed[:,:,z] = source[:,:,z] - np.minimum(source[:,:,z], cv2.GaussianBlur(source[:,:,z], (0,0), 5));
   return removed; 
 

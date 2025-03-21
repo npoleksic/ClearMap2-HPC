@@ -18,18 +18,23 @@ if __name__ == "__main__":
     if len(sys.argv) < 1:
         print("ERROR: SYSTEM ARG COUNT")
         sys.exit()
-    clearmap_path = sys.argv[1]
+    # clearmap_path = sys.argv[1]
+    clearmap_path = '/home/npoleksic/ClearMap2-HPC'
+
     sys.path.append(clearmap_path)
     # clearmap_path = '/home/npoleksic/ClearMap2-HPC'
     # Import supplementary ClearMap modules
     from ClearMap.Environment import *
-    
+
+    # yml_file = 'config_parameters_paul.yml'
+    yml_file = 'config_parameters_ga2.yml'
+    # yml_file = os.path.join(clearmap_path, yml_file)
     # Read parameters from YML file
-    config = read_config('config_parameters.yml')
+    config = read_config(yml_file)
 
     if config:
         directory = config.get('experiment_path')
-        shutil.copy('config_parameters.yml', directory)
+        shutil.copy(yml_file, directory)
 
         ws = wsp.Workspace('CellMap', directory=directory)
 
@@ -37,6 +42,18 @@ if __name__ == "__main__":
         if filetype == "tiff_folder" or filetype == "npy":
             expression_raw = config.get('raw_data_path')
             expression_auto = config.get('autof_data_path')
+        # elif filetype == "npy":
+
+        #     raw_file = config.get('raw_data_path');
+        #     cfos_npy = np.load(os.path.join(directory, raw_file));
+        #     filtered_cfos = np.empty(cfos_npy.shape, dtype=cfos_npy.dtype);
+        #     for z in range(cfos_npy.shape[2]):
+        #         filtered_cfos[:,:,z] = cfos_npy[:,:,z] - np.minimum(cfos_npy[:,:,z], cv2.GaussianBlur(cfos_npy[:,:,z], (0,0), 5));
+        #         print("Gaussian filtering slice: " + str(z))
+
+        #     np.save(os.path.join(directory, "cfos_conv1.npy"), filtered_cfos)
+        #     expression_raw = "cfos_conv1.npy"
+        #     expression_auto = config.get('autof_data_path')
         elif filetype == "tiff":
             raw_fn = config.get('raw_data_path')
             autof_fn = config.get('autof_data_path')
@@ -48,13 +65,21 @@ if __name__ == "__main__":
 
             cfos_tiff = os.path.join(directory, raw_fn)
             autof_tiff = os.path.join(directory, autof_fn)
-            
-            np.save(os.path.join(directory, expression_raw), np.transpose(tiff.imread(cfos_tiff), (2,1,0)))
+
+            cfos_npy = np.transpose(tiff.imread(cfos_tiff), (2,1,0))
+            filtered_cfos = np.empty(cfos_npy.shape, dtype=cfos_npy.dtype);
+            for z in range(cfos_npy.shape[2]):
+                filtered_cfos[:,:,z] = cfos_npy[:,:,z] - np.minimum(cfos_npy[:,:,z], cv2.GaussianBlur(cfos_npy[:,:,z], (0,0), 5));
+                print("Gaussian filtering slice: " + str(z))
+                
+                
+            np.save(os.path.join(directory, expression_raw), filtered_cfos)
+            # np.save(os.path.join(directory, expression_raw), np.transpose(tiff.imread(cfos_tiff), (2,1,0)))
             np.save(os.path.join(directory, expression_auto), np.transpose(tiff.imread(autof_tiff), (2,1,0)))
             
-        # expression_raw = config.get('raw_data_path')
-        # expression_auto = config.get('autof_data_path')
-
+        skip_registration = config.get('skip_registration')
+        skip_detection = config.get('skip_detection')
+        
         raw_x_res = config.get('raw_x_resolution')
         raw_y_res = config.get('raw_y_resolution')
         raw_z_res = config.get('raw_z_resolution')
@@ -233,8 +258,15 @@ if __name__ == "__main__":
             
 
     # Initialize experimental environment
+    cfos = os.path.join(directory, 'cfos.npy')
+    autof = os.path.join(directory, 'autof.npy')
 
-    ws.update(raw=expression_raw, autofluorescence=expression_auto)
+    #TODO: Implement data cropping
+    if not (os.path.exists(cfos) or os.path.exists(autof)): 
+        io.convert(io.as_source(os.path.join(directory, expression_raw)), cfos, processes=32, verbose=True)
+        io.convert(io.as_source(os.path.join(directory, expression_auto)), autof, processes=32, verbose=True)
+
+    ws.update(raw='cfos.npy', autofluorescence='autof.npy', stitched='cfos.npy')
     ws.info()
     ws.debug = False
 
@@ -257,16 +289,27 @@ if __name__ == "__main__":
 
     # Convert raw image stack to NumPy array
     
-    if filetype == "tiff_folder":
-        source = ws.source('raw')
-        sink   = ws.filename('stitched')
-        io.delete_file(sink)
-        io.convert(source, sink, processes=32, verbose=True)
-    else:
-        ws.update(stitched=expression_raw)
-        
-    # cfos = os.path.join(directory, expression_raw.split('.')[0] + '_conv.tif')
-    # autof = os.path.join(directory, expression_auto.split('.')[0] + '_conv.tif')
+    # if filetype == "tiff_folder":
+    #     source = ws.source('raw')
+    #     sink   = ws.filename('stitched')
+    #     io.delete_file(sink)
+    #     io.convert(source, sink, processes=32, verbose=True)
+    # else:
+    #     ws.update(stitched=expression_raw)
+
+    # ws.update(stitched=expression_raw)
+    
+    # cfos = os.path.join(directory, 'cfos_conv.tif')
+    # autof = os.path.join(directory, 'autof_conv.npy')
+    # io.convert(ws.source('raw'), cfos, processes = 32, verbose=True)
+    # io.convert(ws.source('autofluorescence'), autof, processes = 32, verbose=True)
+    # cfos_array = io.read(io.as_source(cfos))
+    # autof_array = io.read(io.as_source(autof))
+
+    # filtered_autof = np.empty(autof_array.shape, dtype=autof_array.dtype)
+    # for z in range(autof_array.shape[2]):
+    #     filtered_autof[:,:,z] = autof_array[:,:,z] - np.minimum(autof_array[:,:,z], cv2.GaussianBlur(autof_array[:,:,z], (0,0), 50))
+    #     print("slice %d" % z)
     
     # annotation_upscaled = os.path.join(directory, 'annotation_upscaled.tif')
     
@@ -274,149 +317,148 @@ if __name__ == "__main__":
     align_reference_outdir = os.path.join(directory, 'elastix_auto_to_reference')
     
     # Convert raw and autof file lists to single tiff files
-    # io.convert(ws.filename('raw'), cfos, processes = 32, verbose=True)
-    # io.convert(ws.filename('autofluorescence'), autof, processes = 32, verbose=True)
+
     
     # # Upscale reference atlas and annotation atlas to match data size
     # upscale(directory, reference_file, autof, 'reference_upscaled.tif')
     # annotation_array = np.transpose(upscale(directory, annotation_file, autof, 'annotation_upscaled.tif'), (2,1,0))
-    #!!!!!!!!!!!!!!!!!!!!!!!!!
-    resample_parameter = {
-        "source_resolution" : (raw_x_res,raw_y_res,raw_z_res),
-        "sink_resolution"   : (25,25,25),
-        "processes" : 32,
-        "verbose" : True,             
-        };    
 
-    io.delete_file(ws.filename('resampled'))
-
-    res.resample(ws.filename('stitched'), sink=ws.filename('resampled'), **resample_parameter)
-
-    resample_parameter_auto = {
-        "source_resolution" : (autof_x_res,autof_y_res,autof_z_res),
-        "sink_resolution"   : (25,25,25),
-        "processes" : 32,
-        "verbose" : True,                
-        };   
-
-    res.resample(ws.filename('autofluorescence'), sink=ws.filename('resampled', postfix='autofluorescence'), **resample_parameter_auto)
-
-    # Align autofluorescent image to cfos image
-    align_channels_parameter = {            
-        "processes" : 64,
-        "moving_image" : ws.filename('resampled', postfix='autofluorescence'),
-        "fixed_image"  : ws.filename('resampled'),
-        "affine_parameter_file"  : align_channels_affine_file,
-        "bspline_parameter_file" : None,
-        "result_directory" : align_channel_outdir
-        }; 
-
-    elx.align(**align_channels_parameter)
-
-    # Align reference image to autfluorescent image
-    align_reference_parameter = {            
-        "processes" : 64,
-        "moving_image" : reference_file,
-        "fixed_image"  : ws.filename('resampled', postfix='autofluorescence'),
-        "affine_parameter_file"  :  align_reference_affine_file,
-        "bspline_parameter_file" :  align_reference_bspline_file,
-        "result_directory" : align_reference_outdir
-        };
-
-    elx.align(**align_reference_parameter)
-    #!!!!!!!!!!!!!!!!!!!!!
-
-    # os.remove(autof)
-    # os.remove(cfos)
-
-    if checkpoints:
-        print("\nALIGNMENT CHECKPOINT")
-        print("\nFrom the newly generated files in your experimental directory, compare: ")
-        print("\t - raw data to elastix_raw_to_auto/result.0.mhd")
-        print("\t - autofluorescence data to elastix_auto_to_reference/result.1.mhd")
-        print("Ensure the files are properly aligned in shape and slicing")
-        checkpoint()
-    print("\nDetecting cells...\n")
-    # Setup cell detection parameters
-    cell_detection_parameter = cells.default_cell_detection_parameter.copy()
-
-    if illumination:
-        cell_detection_parameter['illumination_correction']['flatfield'] = illumination_flatfield
-        cell_detection_parameter['illumination_correction']['background'] = illumination_background
-        cell_detection_parameter['illumination_correction']['scaling'] = illumination_scaling
-        cell_detection_parameter['illumination_correction']['save'] = illumination_save
-    else:
-        cell_detection_parameter['illumination_correction'] = None
-        
-    if background:
-        cell_detection_parameter['background_correction']['shape'] = b_shape
-        cell_detection_parameter['background_correction']['form'] = b_form
-        cell_detection_parameter['background_correction']['save'] = b_save
-    else:
-        cell_detection_parameter['background_correction'] = None
+    if skip_registration:
+        resample_parameter = {
+            "source_resolution" : (raw_x_res,raw_y_res,raw_z_res),
+            "sink_resolution"   : (25,25,25),
+            "processes" : 32,
+            "verbose" : True,             
+            };    
     
-    if equalization:
-        cell_detection_parameter['equalization']['percentile'] = e_percentile
-        cell_detection_parameter['equalization']['max_value'] = e_max_value
-        cell_detection_parameter['equalization']['selem'] = e_selem
-        cell_detection_parameter['equalization']['spacing'] = e_spacing
-        cell_detection_parameter['equalization']['interpolate'] = e_interpolate
-        cell_detection_parameter['equalization']['save'] = e_save
-    else:
-        cell_detection_parameter['equalization'] = None
+        io.delete_file(ws.filename('resampled'))
+    
+        res.resample(ws.filename('stitched'), sink=ws.filename('resampled'), **resample_parameter)
+    
+        resample_parameter_auto = {
+            "source_resolution" : (autof_x_res,autof_y_res,autof_z_res),
+            "sink_resolution"   : (25,25,25),
+            "processes" : 32,
+            "verbose" : True,                
+            };   
+    
+        res.resample(ws.filename('autofluorescence'), sink=ws.filename('resampled', postfix='autofluorescence'), **resample_parameter_auto)
+        # res.resample(filtered_autof, sink=ws.filename('resampled', postfix='autofluorescence'), **resample_parameter_auto)
+    
+        # Align autofluorescent image to cfos image
+        align_channels_parameter = {            
+            "processes" : 64,
+            "moving_image" : ws.filename('resampled', postfix='autofluorescence'),
+            "fixed_image"  : ws.filename('resampled'),
+            "affine_parameter_file"  : align_channels_affine_file,
+            "bspline_parameter_file" : None,
+            "result_directory" : align_channel_outdir
+            }; 
+    
+        elx.align(**align_channels_parameter)
+    
+        # Align reference image to autfluorescent image
+        align_reference_parameter = {            
+            "processes" : 64,
+            "moving_image" : reference_file,
+            "fixed_image"  : ws.filename('resampled', postfix='autofluorescence'),
+            "affine_parameter_file"  :  align_reference_affine_file,
+            "bspline_parameter_file" :  align_reference_bspline_file,
+            "result_directory" : align_reference_outdir
+            };
+    
+        elx.align(**align_reference_parameter)
 
-    if dog:
-        cell_detection_parameter['dog_filter']['shape'] = d_shape
-        cell_detection_parameter['dog_filter']['sigma'] = d_sigma
-        cell_detection_parameter['dog_filter']['sigma2'] = d_sigma2
-        cell_detection_parameter['dog_filter']['save'] = d_save
-    else:
-        cell_detection_parameter['dog_filter'] = None
-    
-    if maxima:
-        cell_detection_parameter['maxima_detection']['h_max'] = m_h_max
-        cell_detection_parameter['maxima_detection']['shape'] = m_shape
-        cell_detection_parameter['maxima_detection']['threshold'] = m_thresh
-        cell_detection_parameter['maxima_detection']['valid'] = m_valid
-        cell_detection_parameter['maxima_detection']['save'] = m_save
-    else:
-        cell_detection_parameter['maxima_detection'] = None
-        
-    if shape_detection:
-        cell_detection_parameter['shape_detection']['threshold'] = s_thresh
-        cell_detection_parameter['shape_detection']['save'] = s_save
-    else:
-        cell_detection_parameter['shape_detection'] = None
-    
-    if intensity:
-        cell_detection_parameter['intensity_detection']['method'] = intensity_method
-        cell_detection_parameter['intensity_detection']['shape'] = intensity_shape
-        cell_detection_parameter['intensity_detection']['measure'] = intensity_measure
-    else:
-        cell_detection_parameter['intensity_detection'] = None
-        
-    processing_parameter = cells.default_cell_detection_processing_parameter.copy()
-    processing_parameter.update(
-        processes = 12,
-        size_max = 45,
-        size_min = 20,
-        overlap  = 10,
-        verbose = True
-        )
 
-    # Perform cell detection on cfos image
-    cells.detect_cells(ws.filename('stitched'), ws.filename('cells', postfix='raw'),
-                       cell_detection_parameter=cell_detection_parameter, 
-                       processing_parameter=processing_parameter)  
+        if checkpoints:
+            print("\nALIGNMENT CHECKPOINT")
+            print("\nFrom the newly generated files in your experimental directory, compare: ")
+            print("\t - raw data to elastix_raw_to_auto/result.0.mhd")
+            print("\t - autofluorescence data to elastix_auto_to_reference/result.1.mhd")
+            print("Ensure the files are properly aligned in shape and slicing")
+            checkpoint()
+        print("\nDetecting cells...\n")
+
+    if skip_detection:
+        # Setup cell detection parameters
+        cell_detection_parameter = cells.default_cell_detection_parameter.copy()
     
-    if checkpoints:
-        print("\nCell detection complete!")
-        checkpoint()
+        if illumination:
+            cell_detection_parameter['illumination_correction']['flatfield'] = illumination_flatfield
+            cell_detection_parameter['illumination_correction']['background'] = illumination_background
+            cell_detection_parameter['illumination_correction']['scaling'] = illumination_scaling
+            cell_detection_parameter['illumination_correction']['save'] = illumination_save
+        else:
+            cell_detection_parameter['illumination_correction'] = None
+            
+        if background:
+            cell_detection_parameter['background_correction']['shape'] = b_shape
+            cell_detection_parameter['background_correction']['form'] = b_form
+            cell_detection_parameter['background_correction']['save'] = b_save
+        else:
+            cell_detection_parameter['background_correction'] = None
         
-    print("\nFiltering and annotating cells...\n")
+        if equalization:
+            cell_detection_parameter['equalization']['percentile'] = e_percentile
+            cell_detection_parameter['equalization']['max_value'] = e_max_value
+            cell_detection_parameter['equalization']['selem'] = e_selem
+            cell_detection_parameter['equalization']['spacing'] = e_spacing
+            cell_detection_parameter['equalization']['interpolate'] = e_interpolate
+            cell_detection_parameter['equalization']['save'] = e_save
+        else:
+            cell_detection_parameter['equalization'] = None
+    
+        if dog:
+            cell_detection_parameter['dog_filter']['shape'] = d_shape
+            cell_detection_parameter['dog_filter']['sigma'] = d_sigma
+            cell_detection_parameter['dog_filter']['sigma2'] = d_sigma2
+            cell_detection_parameter['dog_filter']['save'] = d_save
+        else:
+            cell_detection_parameter['dog_filter'] = None
+        
+        if maxima:
+            cell_detection_parameter['maxima_detection']['h_max'] = m_h_max
+            cell_detection_parameter['maxima_detection']['shape'] = m_shape
+            cell_detection_parameter['maxima_detection']['threshold'] = m_thresh
+            cell_detection_parameter['maxima_detection']['valid'] = m_valid
+            cell_detection_parameter['maxima_detection']['save'] = m_save
+        else:
+            cell_detection_parameter['maxima_detection'] = None
+            
+        if shape_detection:
+            cell_detection_parameter['shape_detection']['threshold'] = s_thresh
+            cell_detection_parameter['shape_detection']['save'] = s_save
+        else:
+            cell_detection_parameter['shape_detection'] = None
+        
+        if intensity:
+            cell_detection_parameter['intensity_detection']['method'] = intensity_method
+            cell_detection_parameter['intensity_detection']['shape'] = intensity_shape
+            cell_detection_parameter['intensity_detection']['measure'] = intensity_measure
+        else:
+            cell_detection_parameter['intensity_detection'] = None
+            
+        processing_parameter = cells.default_cell_detection_processing_parameter.copy()
+        processing_parameter.update(
+            processes = 12,
+            size_max = 45,
+            size_min = 20,
+            overlap  = 10,
+            verbose = True
+            )
+    
+        # Perform cell detection on cfos image
+        cells.detect_cells(ws.filename('stitched'), ws.filename('cells', postfix='raw'),
+                           cell_detection_parameter=cell_detection_parameter, 
+                           processing_parameter=processing_parameter)  
+        
+        if checkpoints:
+            print("\nCell detection complete!")
+            checkpoint()
+            
+        print("\nFiltering and annotating cells...\n")
 
     # Filter cells for size and intensity
-    #!!!!!!!!!!!!!!!!!!!!!
 
     source = ws.source('cells', postfix='raw')
 

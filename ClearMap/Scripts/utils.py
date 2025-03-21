@@ -11,6 +11,7 @@ import os
 import tifffile as tiff
 import datetime
 import numpy as np
+import cv2
 from PIL import Image
 
 def checkpoint():
@@ -20,6 +21,7 @@ def checkpoint():
     
     print("\nPress any key to continue...")
     sys.stdin.read(1)
+    
       
         
 def read_config(path):
