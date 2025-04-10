@@ -485,16 +485,16 @@ def detect_cells_block(source, parameter = default_cell_detection_parameter):
     # extended maxima
     maxima = md.find_maxima(dog, **parameter_maxima, verbose=verbose);
     # maxima = md.find_maxima(source.array, **parameter_maxima, verbose=verbose);
-    
+    centers = md.find_center_of_maxima(dog, maxima=maxima);
     if save:
       save = io.as_source(save);
       save[base_slicing] = maxima[valid_slicing];
     
     #center of maxima
-    if parameter_maxima['h_max']:
-      centers = md.find_center_of_maxima(source.array, maxima=maxima, verbose=verbose);
-    else:
-      centers = ap.where(maxima).array;
+    # if parameter_maxima['h_max']:
+    #   centers = md.find_center_of_maxima(dog, maxima=maxima, verbose=verbose);
+    # else:
+    #   centers = ap.where(maxima).array;
 
     if verbose:
       timer.print_elapsed_time('Maxima detection');
@@ -508,7 +508,8 @@ def detect_cells_block(source, parameter = default_cell_detection_parameter):
       del ids;
   
   del dog, maxima;
-  
+  # del maxima;
+    
   results = (centers,);
   
   #cell shape detection
@@ -522,7 +523,8 @@ def detect_cells_block(source, parameter = default_cell_detection_parameter):
     
     # shape detection
     shape = sd.detect_shape(source, centers, **parameter_shape, verbose=verbose);
-
+    # shape = sd.detect_shape(dog, centers, **parameter_shape, verbose=verbose);
+    # del dog; 
     if save:
       save = io.as_source(save);
       save[base_slicing] = shape[valid_slicing];
@@ -588,11 +590,13 @@ def detect_cells_block(source, parameter = default_cell_detection_parameter):
 def remove_background(source, shape, form = 'Disk'):
   selem = se.structure_element(shape, form=form, ndim=2).astype('uint8');
   removed = np.empty(source.shape, dtype=source.dtype);
+  kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3));
   for z in range(source.shape[2]):
   #   #img[:,:,z] = img[:,:,z] - grey_opening(img[:,:,z], structure = structureElement('Disk', (30,30)));
   #   #img[:,:,z] = img[:,:,z] - morph.grey_opening(img[:,:,z], structure = self.structureELement('Disk', (150,150)));
   #   # removed[:,:,z] = source[:,:,z] - cv2.morphologyEx(source[:,:,z], cv2.MORPH_OPEN, selem)
-    removed[:,:,z] = source[:,:,z] - np.minimum(source[:,:,z], cv2.GaussianBlur(source[:,:,z], (0,0), 5));
+    removed[:,:,z] = source[:,:,z] - np.minimum(source[:,:,z], cv2.GaussianBlur(source[:,:,z], (0,0), 10));
+    removed[:,:,z] = cv2.morphologyEx(removed[:,:,z], cv2.MORPH_OPEN, kernel);
   return removed; 
 
 

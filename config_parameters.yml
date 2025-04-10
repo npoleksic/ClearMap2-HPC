@@ -5,6 +5,7 @@ autof_data_path: 'FT1_autof.npy' # relative path to autofluorescence data from t
 file_type: 'npy' # 'npy', 'tiff', or 'tiff_folder'
 # NOTE: generalize image file names with tag (i.e. Z<Z,4> instead of Z0001, Z0002, etc.)
 
+save_preprocessing: false
 skip_registration: true
 skip_detection: false
 
@@ -23,19 +24,28 @@ y_orientation: 3 # atlas axis that matches experimental data y-axis
 z_orientation: 2 # atlas axis that matches experimental data z-axis
 # NOTE: orientations should be expressed as a 1, 2, or 3 corresponding to axes x, y, and z
 
-data_x_min: 0 # minimum crop in x-direction (after atlas-matching)
-data_x_max: 'MAX' # maximum crop in x-direction
-data_y_min: 500 # minimum crop in y-direction
-data_y_max: 2000 # maximum crop in y-direction
-data_z_min: 0 # minimum crop in z-direction
-data_z_max: 'MAX' # maximum crop in z-direction
+raw_x_min: 0 # minimum crop in x-direction 
+raw_x_max: 'MAX' # maximum crop in x-direction
+raw_y_min: 0 # minimum crop in y-direction
+raw_y_max: 'MAX' # maximum crop in y-direction
+raw_z_min: 0 # minimum crop in z-direction
+raw_z_max: 'MAX' # maximum crop in z-direction
+
+crop_match: true
+
+auto_x_min: 0 # minimum crop in x-direction 
+auto_x_max: 'MAX' # maximum crop in x-direction
+auto_y_min: 0 # minimum crop in y-direction
+auto_y_max: 'MAX' # maximum crop in y-direction
+auto_z_min: 0 # minimum crop in z-direction
+auto_z_max: 'MAX' # maximum crop in z-direction
 
 atlas_x_min: 0 # minimum crop in x-direction (after atlas-matching)
 atlas_x_max: 'MAX' # maximum crop in x-direction
 atlas_y_min: 0 # minimum crop in y-direction
 atlas_y_max: 'MAX' # maximum crop in y-direction
-atlas_z_min: 100 # minimum crop in z-direction
-atlas_z_max: 390 # maximum crop in z-direction
+atlas_z_min: 0 # minimum crop in z-direction
+atlas_z_max: 'MAX' # maximum crop in z-direction
 
 # CELL DETECTION PARAMETERS -> CHECK ClearMap/ImageProcessing/Cells.py @detect_cells for documentation 
 

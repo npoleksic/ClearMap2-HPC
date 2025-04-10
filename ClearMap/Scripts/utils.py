@@ -6,6 +6,7 @@ import csv
 import json
 import pandas as pd
 from scipy.io import savemat
+from scipy.spatial import cKDTree
 import shutil 
 import os 
 import tifffile as tiff
@@ -55,9 +56,7 @@ def remove_overlap(source, filter_distance_min):
     """Removes overlapping cells after detection.
     
     Cells are removed if all three coordinates are within filter_distance_min of
-    a cell of greater intensity, or if they are within half of filter_distance_min
-    in the x and y direction, and 2x filter_distance_min in the z direction to correct
-    for cells appearing in multiple slices due to out-of-plane excitation during imaging
+    a cell of greater intensity
 
     Arguments
     ---------
@@ -72,29 +71,31 @@ def remove_overlap(source, filter_distance_min):
             Input array with overlapping cells removed 
     """    
     
-    indices_to_remove = set()
-    source_coordinates = np.column_stack((source['x'], source['y'], source['z']))
-    z_overlap_min = np.array([filter_distance_min/2, filter_distance_min/2, filter_distance_min*2])
+    coordinates = np.column_stack((source['x'], source['y'], source['z']))
+    keep = np.ones(len(coordinates), dtype=bool)
+
+    tree = cKDTree(coordinates)
+    total_points = len(coordinates)
+    progress_interval = max(total_points // 100, 1) 
+
+    for i, point in enumerate(coordinates):
+        if (i+1) % progress_interval == 0:
+            percent_done = 100* (i+1) / total_points
+            print(f"Processed {i + 1}/{total_points} points. ({percent_done:.1f}%)")
+            
+        if not keep[i]:
+            continue 
+
+        neighbor_indices = tree.query_ball_point(point, filter_distance_min)
+
+        for neighbor in neighbor_indices:
+            if neighbor > i:
+                keep[neighbor] = False
     
-    for i in range(len(source_coordinates)):
-        if i not in indices_to_remove:
-            current_point = source_coordinates[i]  
-            
-            diffs = abs(source_coordinates - current_point)
-            
-            close_indices = np.where(np.all(diffs < filter_distance_min, axis=1))[0]
-            close_indices = close_indices[close_indices != i]
-            
-            close_z_indices = np.where(np.all(diffs < z_overlap_min, axis=1))[0]
-            close_z_indices = close_z_indices[close_z_indices != i]
+    source_filtered = source[keep]
+    final_removed = np.sum(~keep)
+    print(f"Overlap removal complete: {final_removed} points removed out of {total_points}.")
 
-            if close_indices.size > 0:
-                indices_to_remove.update(set(close_indices))
-                indices_to_remove.update(set(close_z_indices))
-        else:
-            print("Removed overlapping cell at index: " + str(i))
-
-    source_filtered = np.delete(source, list(indices_to_remove), axis=0)
     return source_filtered
     
     
@@ -509,3 +510,16 @@ def upscale(directory, source_file, target_shape_file, output_file):
     print(f"Full processing time: {datetime.datetime.now()-starttime}")
     
     return target_rot
+
+def move_files(directory, files):
+    dt = datetime.datetime.now()
+    destination = os.path.join(directory, dt.strftime("%m%d%Y_%H%M"))
+    os.makedirs(destination, exist_ok=True)
+    
+    for file in files:
+        file_path = os.path.join(directory, file)
+        try:
+            shutil.move(file_path, destination)
+            print(f"Moved {file} to {destination}")
+        except Exception as e:
+            print(f"Error moving {file}: {e}")

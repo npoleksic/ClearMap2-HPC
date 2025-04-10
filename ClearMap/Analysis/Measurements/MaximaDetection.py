@@ -19,7 +19,8 @@ import scipy.ndimage.measurements as ndm
 import scipy.ndimage.filters as ndf
 
 import ClearMap.ImageProcessing.GreyReconstruction as gr
-import skimage.morphology.greyreconstruct as grey
+# import skimage.morphology.greyreconstruct as grey
+import skimage.morphology as morph
 
 import ClearMap.Utils.Timer as tmr
 import ClearMap.Utils.HierarchicalDict as hdict
@@ -49,7 +50,7 @@ def h_max_transform(source, h_max):
     else:
         seed = np.where(source >= h_max, source - h_max, 0)
 
-    return grey.reconstruction(seed=seed, mask=source);
+    return morph.reconstruction(seed=seed, mask=source);
 
 
 def local_max(source, shape = 5):
@@ -99,7 +100,7 @@ def extended_max(source, h_max = 0, shape = 5):
     Extended maxima are the local maxima of the h-max transform.
     """
     #h max transformimport scipy
-    if not(h_max is None) and h_max > 0:
+    if h_max is not None and h_max > 0:
         source = h_max_transform(source, h_max);
 
     #max
@@ -197,7 +198,7 @@ def find_center_of_maxima(source, maxima = None, label = None, verbose = False):
     else:
         centers = np.zeros((0,source.ndim));
   
-    # if verbose:
-    #   timer.print_elapsed_time('Center of Maxima: %d maxima detected' % centers.shape[0]);
+    if verbose:
+      timer.print_elapsed_time('Center of Maxima: %d maxima detected' % centers.shape[0]);
     
     return centers;

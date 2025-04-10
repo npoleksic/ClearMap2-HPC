@@ -18,8 +18,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 1:
         print("ERROR: SYSTEM ARG COUNT")
         sys.exit()
-    # clearmap_path = sys.argv[1]
-    clearmap_path = '/home/npoleksic/ClearMap2-HPC'
+    clearmap_path = sys.argv[1]
+    # clearmap_path = '/home/npoleksic/ClearMap2-HPC'
 
     sys.path.append(clearmap_path)
     # clearmap_path = '/home/npoleksic/ClearMap2-HPC'
@@ -76,7 +76,13 @@ if __name__ == "__main__":
             np.save(os.path.join(directory, expression_raw), filtered_cfos)
             # np.save(os.path.join(directory, expression_raw), np.transpose(tiff.imread(cfos_tiff), (2,1,0)))
             np.save(os.path.join(directory, expression_auto), np.transpose(tiff.imread(autof_tiff), (2,1,0)))
-            
+
+
+        
+        target_raw_shape = io.shape(os.path.join(directory, expression_raw))
+        target_auto_shape = io.shape(os.path.join(directory, expression_auto))
+
+        save_preproc = config.get('save_preprocessing')
         skip_registration = config.get('skip_registration')
         skip_detection = config.get('skip_detection')
         
@@ -93,25 +99,101 @@ if __name__ == "__main__":
         y_orient = config.get('y_orientation')
         z_orient = config.get('z_orientation')
         
-        x_min = config.get('atlas_x_min')
-        x_max = config.get('atlas_x_max')
-        y_min = config.get('atlas_y_min')
-        y_max = config.get('atlas_y_max')
-        z_min = config.get('atlas_z_min')
-        z_max = config.get('atlas_z_max')
+        raw_x_min = config.get('raw_x_min')
+        raw_x_max = config.get('raw_x_max')
+        raw_y_min = config.get('raw_y_min')
+        raw_y_max = config.get('raw_y_max')
+        raw_z_min = config.get('raw_z_min')
+        raw_z_max = config.get('raw_z_max')
 
-        if(x_min == 0):
-            x_min = None
-        if(x_max == "MAX"):
-            x_max = None
-        if(y_min == 0):
-            y_min = None
-        if(y_max == "MAX"):
-            y_max = None
-        if(z_min == 0):
-            z_min = None
-        if(z_max == "MAX"):
-            z_max = None
+
+        if config.get('raw_x_max') == "MAX":
+            target_raw_shape = (target_raw_shape[0] - raw_x_min, target_raw_shape[1], target_raw_shape[2])
+            raw_x_max = None
+        else:
+            target_raw_shape = (raw_x_max - raw_x_min, target_raw_shape[1], target_raw_shape[2])
+
+        if config.get('raw_y_max') == "MAX":
+            target_raw_shape = (target_raw_shape[0], target_raw_shape[1] - raw_y_min, target_raw_shape[2])
+            raw_y_max = None
+        else:
+            target_raw_shape = (target_raw_shape[0], raw_y_max - raw_y_min, target_raw_shape[2])
+
+        if config.get('raw_z_max') == "MAX":
+            target_raw_shape = (target_raw_shape[0], target_raw_shape[1], target_raw_shape[2] - raw_z_min)
+            raw_z_max = None
+        else:
+            target_raw_shape = (target_raw_shape[0], target_raw_shape[1], raw_z_max - raw_z_min)
+        
+        if(raw_x_min == 0):
+            raw_x_min = None
+        if(raw_y_min == 0):
+            raw_y_min = None
+        if(raw_z_min == 0):
+            raw_z_min = None
+
+        crop_match = config.get('crop_match')
+
+        if crop_match:
+            auto_x_min = raw_x_min
+            auto_x_max = raw_x_max
+            auto_y_min = raw_y_min
+            auto_y_max = raw_y_max
+            auto_z_min = raw_z_min
+            auto_z_max = raw_z_max
+            target_auto_shape = target_raw_shape
+        else: 
+            auto_x_min = config.get('auto_x_min')
+            auto_x_max = config.get('auto_x_max')
+            auto_y_min = config.get('auto_y_min')
+            auto_y_max = config.get('auto_y_max')
+            auto_z_min = config.get('auto_z_min')
+            auto_z_max = config.get('auto_z_max')
+    
+            if config.get('auto_x_max') == "MAX":
+                target_auto_shape = (target_auto_shape[0] - auto_x_min, target_auto_shape[1], target_auto_shape[2])
+                auto_x_max = None
+            else:
+                target_auto_shape = (auto_x_max - auto_x_min, target_auto_shape[1], target_auto_shape[2])
+    
+            if config.get('auto_y_max') == "MAX":
+                target_auto_shape = (target_auto_shape[0], target_auto_shape[1] - auto_y_min, target_auto_shape[2])
+                auto_y_max = None
+            else:
+                target_auto_shape = (target_auto_shape[0], auto_y_max - auto_y_min, target_auto_shape[2])
+    
+            if config.get('auto_z_max') == "MAX":
+                target_auto_shape = (target_auto_shape[0], target_auto_shape[1], target_auto_shape[2] - auto_z_min)
+                auto_z_max = None
+            else:
+                target_auto_shape = (target_auto_shape[0], target_auto_shape[1], auto_z_max - auto_z_min)
+            
+            if(auto_x_min == 0):
+                auto_x_min = None
+            if(auto_y_min == 0):
+                auto_y_min = None
+            if(auto_z_min == 0):
+                auto_z_min = None
+        
+        atlas_x_min = config.get('atlas_x_min')
+        atlas_x_max = config.get('atlas_x_max')
+        atlas_y_min = config.get('atlas_y_min')
+        atlas_y_max = config.get('atlas_y_max')
+        atlas_z_min = config.get('atlas_z_min')
+        atlas_z_max = config.get('atlas_z_max')
+
+        if(atlas_x_min == 0):
+            atlas_x_min = None
+        if(atlas_x_max == "MAX"):
+            atlas_x_max = None
+        if(atlas_y_min == 0):
+            atlas_y_min = None
+        if(atlas_y_max == "MAX"):
+            atlas_y_max = None
+        if(atlas_z_min == 0):
+            atlas_z_min = None
+        if(atlas_z_max == "MAX"):
+            atlas_z_max = None
             
         illumination = config.get('illumination_correction')
         illumination_flatfield = config.get('illumination_correction_flatfield')
@@ -260,20 +342,65 @@ if __name__ == "__main__":
     # Initialize experimental environment
     cfos = os.path.join(directory, 'cfos.npy')
     autof = os.path.join(directory, 'autof.npy')
+    
+    if not os.path.exists(cfos):
+        print("\nConverting raw data channel to npy array...\n")
+        io.convert(os.path.join(directory, expression_raw), cfos, processes=32, verbose=True)
 
-    #TODO: Implement data cropping
-    if not (os.path.exists(cfos) or os.path.exists(autof)): 
-        io.convert(io.as_source(os.path.join(directory, expression_raw)), cfos, processes=32, verbose=True)
-        io.convert(io.as_source(os.path.join(directory, expression_auto)), autof, processes=32, verbose=True)
+    if not os.path.exists(autof):
+        print("\nConverting autofluorescence data channel to npy array...\n")
+        io.convert(os.path.join(directory, expression_auto), autof, processes=32, verbose=True)
 
     ws.update(raw='cfos.npy', autofluorescence='autof.npy', stitched='cfos.npy')
+    ws.debug = False
+
+    if not io.shape(ws.source('raw')) == target_raw_shape:
+        print("\nCropping raw data channel to specified dimensions...\n")
+        cfos_data = np.load(ws.filename('raw'))
+        cfos_data = cfos_data[raw_x_min:raw_x_max, raw_y_min:raw_y_max, raw_z_min:raw_z_max]
+        io.convert(cfos_data, cfos, processes=32, verbose=True)
+        del cfos_data
+
+    if not io.shape(ws.source('autofluorescence')) == target_auto_shape:
+        print("\nCropping autofluorescence data channel to specified dimensions...\n")
+        autof_data = np.load(ws.filename('autofluorescence'))
+        autof_data = autof_data[auto_x_min:auto_x_max, auto_y_min:auto_y_max, auto_z_min:auto_z_max]
+        io.convert(autof_data, autof, processes=32, verbose=True)
+        del autof_data
+
+    ws.update(raw='cfos.npy', autofluorescence='autof.npy', stitched='cfos.npy')
+
+    preprocessed_data = os.path.join(directory, 'cfos_preproc.npy')
+    
+    if not os.path.exists(preprocessed_data)
+        
+    # ws.update(raw='cfos_preproc.npy', autofluorescence='autof.npy', stitched='cfos_preproc.npy')
+        print("Pre-processing images...")
+        new_cfos = np.empty_like(ws.source('raw'));
+        kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3));
+        for z in range(new_cfos.shape[2]):
+            new_cfos[:,:,z] = ws.source('raw')[:,:,z] - np.minimum(ws.source('raw')[:,:,z], cv2.GaussianBlur(ws.source('raw')[:,:,z], (0,0), 10));
+            new_cfos[:,:,z] = cv2.morphologyEx(new_cfos[:,:,z], cv2.MORPH_OPEN, kernel);
+            print(f"Filtered slice: {z}")
+
+        print("Pre-processing finished, writing new array file...")
+        io.convert(new_cfos, preprocessed_data, processes=32, verbose=True)
+        print("Done.")
+
+        if save_preproc:
+            print("Saving as tif...")
+            io.convert(new_cfos, os.path.join(directory, 'cfos_preproc.tif'), processes=32, verbose=True)
+            print("Done.")
+
+        ws.update(raw='cfos_preproc.npy', autofluorescence='autof.npy', stitched='cfos_preproc.npy')
+            
     ws.info()
     ws.debug = False
 
     resources_directory = settings.resources_path
 
     annotation_file, reference_file, distance_file=ano.prepare_annotation_files(
-        slicing=(slice(x_min,x_max),slice(y_min,y_max),slice(z_min,z_max)), orientation=(x_orient,y_orient,z_orient),
+        slicing=(slice(atlas_x_min,atlas_x_max),slice(atlas_y_min,atlas_y_max),slice(atlas_z_min,atlas_z_max)), orientation=(x_orient,y_orient,z_orient),
         overwrite=False, verbose=True);
 
     align_channels_affine_file   = io.join(resources_directory, 'Alignment/align_affine.txt')
@@ -285,45 +412,11 @@ if __name__ == "__main__":
         print("\nNavigate to ClearMap/Resources/Atlas and ensure the newly generated reference atlas matches the orientation and crop of your experimental data.")
         checkpoint()
     
-    print("\nResampling and aligning channels...\n")
-
-    # Convert raw image stack to NumPy array
-    
-    # if filetype == "tiff_folder":
-    #     source = ws.source('raw')
-    #     sink   = ws.filename('stitched')
-    #     io.delete_file(sink)
-    #     io.convert(source, sink, processes=32, verbose=True)
-    # else:
-    #     ws.update(stitched=expression_raw)
-
-    # ws.update(stitched=expression_raw)
-    
-    # cfos = os.path.join(directory, 'cfos_conv.tif')
-    # autof = os.path.join(directory, 'autof_conv.npy')
-    # io.convert(ws.source('raw'), cfos, processes = 32, verbose=True)
-    # io.convert(ws.source('autofluorescence'), autof, processes = 32, verbose=True)
-    # cfos_array = io.read(io.as_source(cfos))
-    # autof_array = io.read(io.as_source(autof))
-
-    # filtered_autof = np.empty(autof_array.shape, dtype=autof_array.dtype)
-    # for z in range(autof_array.shape[2]):
-    #     filtered_autof[:,:,z] = autof_array[:,:,z] - np.minimum(autof_array[:,:,z], cv2.GaussianBlur(autof_array[:,:,z], (0,0), 50))
-    #     print("slice %d" % z)
-    
-    # annotation_upscaled = os.path.join(directory, 'annotation_upscaled.tif')
-    
     align_channel_outdir = os.path.join(directory, 'elastix_raw_to_auto')
     align_reference_outdir = os.path.join(directory, 'elastix_auto_to_reference')
     
-    # Convert raw and autof file lists to single tiff files
-
-    
-    # # Upscale reference atlas and annotation atlas to match data size
-    # upscale(directory, reference_file, autof, 'reference_upscaled.tif')
-    # annotation_array = np.transpose(upscale(directory, annotation_file, autof, 'annotation_upscaled.tif'), (2,1,0))
-
-    if skip_registration:
+    if not skip_registration:
+        print("\nResampling and aligning channels...\n")
         resample_parameter = {
             "source_resolution" : (raw_x_res,raw_y_res,raw_z_res),
             "sink_resolution"   : (25,25,25),
@@ -343,7 +436,6 @@ if __name__ == "__main__":
             };   
     
         res.resample(ws.filename('autofluorescence'), sink=ws.filename('resampled', postfix='autofluorescence'), **resample_parameter_auto)
-        # res.resample(filtered_autof, sink=ws.filename('resampled', postfix='autofluorescence'), **resample_parameter_auto)
     
         # Align autofluorescent image to cfos image
         align_channels_parameter = {            
@@ -377,9 +469,9 @@ if __name__ == "__main__":
             print("\t - autofluorescence data to elastix_auto_to_reference/result.1.mhd")
             print("Ensure the files are properly aligned in shape and slicing")
             checkpoint()
-        print("\nDetecting cells...\n")
 
-    if skip_detection:
+    if not skip_detection:
+        print("\nDetecting cells...\n")
         # Setup cell detection parameters
         cell_detection_parameter = cells.default_cell_detection_parameter.copy()
     
@@ -456,9 +548,9 @@ if __name__ == "__main__":
             print("\nCell detection complete!")
             checkpoint()
             
-        print("\nFiltering and annotating cells...\n")
 
     # Filter cells for size and intensity
+    print("\nFiltering and annotating cells...\n")
 
     source = ws.source('cells', postfix='raw')
 
@@ -506,10 +598,11 @@ if __name__ == "__main__":
     header = ', '.join([h for h in source.dtype.names])
     source = remove_universe(source.array)
     source = np.flip(np.sort(source, order=['source']),axis=0)
-    # source = remove_overlap(source, filter_distance_min) 
+    source = remove_overlap(source, filter_distance_min) 
     source = np.sort(source, order=['z'])
     np.savetxt(ws.filename('cells', extension='csv'), source, header=header, delimiter=',', fmt='%s')
-
+    
+    # np.savetxt(os.path.join(directory, 'cells_removed.csv'), source, header=header, delimiter=',', fmt='%s')
     # print("\nBeginning cell voxelization...\n")
     # Voxelize detected cells
     coordinates = np.array([source[n] for n in ['xt','yt','zt']]).T
@@ -544,5 +637,8 @@ if __name__ == "__main__":
     # os.remove(ws.filename('stitched'))
     os.remove(ws.filename('cells', postfix='raw'))
     # os.remove(ws.filename('cells', postfix='filtered'))
+
+    files_to_move = ['cells.csv', yml_file, 'region_data.mat', 'regions.csv']
+    move_files(directory, files_to_move)
     
     print("CellMap Pipeline Complete!")
