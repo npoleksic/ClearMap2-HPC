@@ -10,6 +10,13 @@ Adapted original ClearMap2.0 CellMap.py script to be executed from a shell scrip
 __license__   = 'GPLv3 - GNU General Pulic License v3 (see LICENSE)'
 __copyright__ = 'Copyright © 2020 by Christoph Kirst'
 
+# from utils import *
+# clearmap_path = '/home/npoleksic/ClearMap2-HPC'
+# sys.path.append(clearmap_path)
+# from ClearMap.Environment import *
+# yml_file = 'config_parameters_ga2.yml'
+# config = read_config(os.path.join(clearmap_path, yml_file))
+
 from utils import *
 
 if __name__ == "__main__":
@@ -19,16 +26,13 @@ if __name__ == "__main__":
         print("ERROR: SYSTEM ARG COUNT")
         sys.exit()
     clearmap_path = sys.argv[1]
-    # clearmap_path = '/home/npoleksic/ClearMap2-HPC'
-
+    
     sys.path.append(clearmap_path)
-    # clearmap_path = '/home/npoleksic/ClearMap2-HPC'
+    
     # Import supplementary ClearMap modules
     from ClearMap.Environment import *
-
-    # yml_file = 'config_parameters_paul.yml'
     yml_file = 'config_parameters_ga2.yml'
-    # yml_file = os.path.join(clearmap_path, yml_file)
+    
     # Read parameters from YML file
     config = read_config(yml_file)
 
@@ -38,50 +42,38 @@ if __name__ == "__main__":
 
         ws = wsp.Workspace('CellMap', directory=directory)
 
-        filetype = config.get('file_type')
-        if filetype == "tiff_folder" or filetype == "npy":
-            expression_raw = config.get('raw_data_path')
-            expression_auto = config.get('autof_data_path')
-        # elif filetype == "npy":
+        expression_raw = config.get('raw_data_path')
+        expression_auto = config.get('autof_data_path')
 
-        #     raw_file = config.get('raw_data_path');
-        #     cfos_npy = np.load(os.path.join(directory, raw_file));
-        #     filtered_cfos = np.empty(cfos_npy.shape, dtype=cfos_npy.dtype);
-        #     for z in range(cfos_npy.shape[2]):
-        #         filtered_cfos[:,:,z] = cfos_npy[:,:,z] - np.minimum(cfos_npy[:,:,z], cv2.GaussianBlur(cfos_npy[:,:,z], (0,0), 5));
-        #         print("Gaussian filtering slice: " + str(z))
+        if len(io.shape(os.path.join(directory, expression_raw))) == 2:
+            janky_tiff = True
+        else:
+            janky_tiff = False
 
-        #     np.save(os.path.join(directory, "cfos_conv1.npy"), filtered_cfos)
-        #     expression_raw = "cfos_conv1.npy"
-        #     expression_auto = config.get('autof_data_path')
-        elif filetype == "tiff":
-            raw_fn = config.get('raw_data_path')
-            autof_fn = config.get('autof_data_path')
-            
-            expression_raw = raw_fn.split('.')[0] + '.npy'
-            expression_auto = autof_fn.split('.')[0] + '.npy'
-            
-            print("\nConverting input files to .npy ...\n")
+        # Initialize experimental environment
+        cfos_file = os.path.join(directory, 'cfos.npy')
+        autof_file = os.path.join(directory, 'autof.npy')
+    
+        if not os.path.exists(cfos_file):
+            print("\nConverting raw data channel to npy array...\n")
+            if janky_tiff:
+                cfos_data = np.transpose(tiff.imread(os.path.join(directory, expression_raw)), (2,1,0))
+                io.convert(cfos_data, cfos_file, processes=32, verbose=True)
+            else:
+                io.convert(os.path.join(directory, expression_raw), cfos_file, processes=32, verbose=True)
+    
+        if not os.path.exists(autof_file):
+            print("\nConverting autofluorescence data channel to npy array...\n")
+            if janky_tiff:
+                autof_data = np.transpose(tiff.imread(os.path.join(directory, expression_auto)), (2,1,0))
+                io.convert(autof_data, autof_file, processes=32, verbose=True)
+            else:
+                io.convert(os.path.join(directory, expression_auto), autof_file, processes=32, verbose=True)
 
-            cfos_tiff = os.path.join(directory, raw_fn)
-            autof_tiff = os.path.join(directory, autof_fn)
+        target_raw_shape = io.shape(cfos_file)
+        target_auto_shape = io.shape(autof_file)
 
-            cfos_npy = np.transpose(tiff.imread(cfos_tiff), (2,1,0))
-            filtered_cfos = np.empty(cfos_npy.shape, dtype=cfos_npy.dtype);
-            for z in range(cfos_npy.shape[2]):
-                filtered_cfos[:,:,z] = cfos_npy[:,:,z] - np.minimum(cfos_npy[:,:,z], cv2.GaussianBlur(cfos_npy[:,:,z], (0,0), 5));
-                print("Gaussian filtering slice: " + str(z))
-                
-                
-            np.save(os.path.join(directory, expression_raw), filtered_cfos)
-            # np.save(os.path.join(directory, expression_raw), np.transpose(tiff.imread(cfos_tiff), (2,1,0)))
-            np.save(os.path.join(directory, expression_auto), np.transpose(tiff.imread(autof_tiff), (2,1,0)))
-
-
-        
-        target_raw_shape = io.shape(os.path.join(directory, expression_raw))
-        target_auto_shape = io.shape(os.path.join(directory, expression_auto))
-
+        save_crop = config.get('save_crop')
         save_preproc = config.get('save_preprocessing')
         skip_registration = config.get('skip_registration')
         skip_detection = config.get('skip_detection')
@@ -105,7 +97,6 @@ if __name__ == "__main__":
         raw_y_max = config.get('raw_y_max')
         raw_z_min = config.get('raw_z_min')
         raw_z_max = config.get('raw_z_max')
-
 
         if config.get('raw_x_max') == "MAX":
             target_raw_shape = (target_raw_shape[0] - raw_x_min, target_raw_shape[1], target_raw_shape[2])
@@ -338,45 +329,36 @@ if __name__ == "__main__":
         if(filter_intensity_max == "MAX"):
             filter_intensity_max = None
             
-
-    # Initialize experimental environment
-    cfos = os.path.join(directory, 'cfos.npy')
-    autof = os.path.join(directory, 'autof.npy')
-    
-    if not os.path.exists(cfos):
-        print("\nConverting raw data channel to npy array...\n")
-        io.convert(os.path.join(directory, expression_raw), cfos, processes=32, verbose=True)
-
-    if not os.path.exists(autof):
-        print("\nConverting autofluorescence data channel to npy array...\n")
-        io.convert(os.path.join(directory, expression_auto), autof, processes=32, verbose=True)
-
     ws.update(raw='cfos.npy', autofluorescence='autof.npy', stitched='cfos.npy')
     ws.debug = False
 
-    if not io.shape(ws.source('raw')) == target_raw_shape:
+    if not io.shape(cfos_file) == target_raw_shape:
         print("\nCropping raw data channel to specified dimensions...\n")
-        cfos_data = np.load(ws.filename('raw'))
+        if not janky_tiff:
+            cfos_data = np.load(cfos_file)
         cfos_data = cfos_data[raw_x_min:raw_x_max, raw_y_min:raw_y_max, raw_z_min:raw_z_max]
-        io.convert(cfos_data, cfos, processes=32, verbose=True)
+        io.convert(cfos_data, cfos_file, processes=32, verbose=True)
+        if save_crop:
+            io.convert(cfos_data, os.path.join(directory, 'cfos.tif'), processes=32, verbose=True)
         del cfos_data
 
-    if not io.shape(ws.source('autofluorescence')) == target_auto_shape:
+    if not io.shape(autof_file) == target_auto_shape:
         print("\nCropping autofluorescence data channel to specified dimensions...\n")
-        autof_data = np.load(ws.filename('autofluorescence'))
+        if not janky_tiff:
+            autof_data = np.load(autof_file)
         autof_data = autof_data[auto_x_min:auto_x_max, auto_y_min:auto_y_max, auto_z_min:auto_z_max]
-        io.convert(autof_data, autof, processes=32, verbose=True)
+        io.convert(autof_data, autof_file, processes=32, verbose=True)
+        if save_crop:
+            io.convert(autof_data, os.path.join(directory, 'autof.tif'), processes=32, verbose=True)
         del autof_data
 
     ws.update(raw='cfos.npy', autofluorescence='autof.npy', stitched='cfos.npy')
 
     preprocessed_data = os.path.join(directory, 'cfos_preproc.npy')
     
-    if not os.path.exists(preprocessed_data)
-        
-    # ws.update(raw='cfos_preproc.npy', autofluorescence='autof.npy', stitched='cfos_preproc.npy')
+    if not os.path.exists(preprocessed_data):
         print("Pre-processing images...")
-        new_cfos = np.empty_like(ws.source('raw'));
+        new_cfos = np.empty(ws.source('raw').shape, dtype=ws.source('raw').dtype)
         kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3));
         for z in range(new_cfos.shape[2]):
             new_cfos[:,:,z] = ws.source('raw')[:,:,z] - np.minimum(ws.source('raw')[:,:,z], cv2.GaussianBlur(ws.source('raw')[:,:,z], (0,0), 10));
@@ -392,7 +374,7 @@ if __name__ == "__main__":
             io.convert(new_cfos, os.path.join(directory, 'cfos_preproc.tif'), processes=32, verbose=True)
             print("Done.")
 
-        ws.update(raw='cfos_preproc.npy', autofluorescence='autof.npy', stitched='cfos_preproc.npy')
+        del new_cfos
             
     ws.info()
     ws.debug = False
@@ -461,7 +443,6 @@ if __name__ == "__main__":
     
         elx.align(**align_reference_parameter)
 
-
         if checkpoints:
             print("\nALIGNMENT CHECKPOINT")
             print("\nFrom the newly generated files in your experimental directory, compare: ")
@@ -471,8 +452,8 @@ if __name__ == "__main__":
             checkpoint()
 
     if not skip_detection:
-        print("\nDetecting cells...\n")
         # Setup cell detection parameters
+        print("\nDetecting cells...\n")
         cell_detection_parameter = cells.default_cell_detection_parameter.copy()
     
         if illumination:
@@ -538,7 +519,11 @@ if __name__ == "__main__":
             overlap  = 10,
             verbose = True
             )
-    
+
+        ws.update(raw='cfos_preproc.npy', autofluorescence='autof.npy', stitched='cfos_preproc.npy')
+        ws.info()
+        ws.debug = False
+        
         # Perform cell detection on cfos image
         cells.detect_cells(ws.filename('stitched'), ws.filename('cells', postfix='raw'),
                            cell_detection_parameter=cell_detection_parameter, 
@@ -546,29 +531,31 @@ if __name__ == "__main__":
         
         if checkpoints:
             print("\nCell detection complete!")
-            checkpoint()
-            
+            checkpoint()        
 
-    # Filter cells for size and intensity
-    print("\nFiltering and annotating cells...\n")
+        # Filter cells for size and intensity
+        print("\nFiltering cells...\n")
+    
+        source = ws.source('cells', postfix='raw')
+    
+        thresholds = {
+            'source' : (filter_intensity_min, filter_intensity_max),
+            'size': (filter_size_min, filter_size_max)
+            }
+    
+        cells.filter_cells(source = ws.filename('cells', postfix='raw'), 
+                           sink = ws.filename('cells', postfix='filtered'), 
+                           thresholds=thresholds); 
 
-    source = ws.source('cells', postfix='raw')
-
-    thresholds = {
-        'source' : (filter_intensity_min, filter_intensity_max),
-        'size': (filter_size_min, filter_size_max)
-        }
-
-    cells.filter_cells(source = ws.filename('cells', postfix='raw'), 
-                       sink = ws.filename('cells', postfix='filtered'), 
-                       thresholds=thresholds); 
-
+    print("\nMapping detected cells to brain regions...\n")
+    
     source = ws.source('cells', postfix='filtered')
     coordinates = np.array([source[c] for c in 'xyz']).T
 
     coordinates_transformed = transformation(coordinates, align_channel_outdir, align_reference_outdir, workspace=ws)
-    
+   
     # Annotate cells based on position in annotation image
+    print("\nLabeling cells...\n")
     label = ano.label_points(coordinates_transformed, key='order', annotation_file=annotation_file)
     names = ano.convert_label(label, key='order', value='name')
     ID = ano.convert_label(label, key='order', value='id')
@@ -590,10 +577,9 @@ if __name__ == "__main__":
     if checkpoints:
         print("\nCell annotation complete!")
         checkpoint()
-        
-    print("\nRemoving invalid cells and exporting detected cell data...\n")
-    
+
     # Remove invalid and overlapping cells. Export corrected cell data to CSV
+    print("\nRemoving invalid cells and exporting detected cell data...\n")
     source = ws.source('cells')
     header = ', '.join([h for h in source.dtype.names])
     source = remove_universe(source.array)
@@ -601,31 +587,30 @@ if __name__ == "__main__":
     source = remove_overlap(source, filter_distance_min) 
     source = np.sort(source, order=['z'])
     np.savetxt(ws.filename('cells', extension='csv'), source, header=header, delimiter=',', fmt='%s')
-    
-    # np.savetxt(os.path.join(directory, 'cells_removed.csv'), source, header=header, delimiter=',', fmt='%s')
-    # print("\nBeginning cell voxelization...\n")
-    # Voxelize detected cells
-    coordinates = np.array([source[n] for n in ['xt','yt','zt']]).T
-    # intensities = source['source']
-    
-    # voxelization_parameter = dict(
-    #       shape = io.shape(annotation_upscaled), 
-    #       dtype = None, 
-    #       weights = None,
-    #       method = 'sphere', 
-    #       radius = (3,3,3), 
-    #       kernel = None, 
-    #       processes = 16, 
-    #       verbose = True
-    #       )
 
-    # vox.voxelize(coordinates, sink=ws.filename('density', postfix='counts'), **voxelization_parameter)
-        
+    # Voxelize detected cells
+    print("\nBeginning cell voxelization...\n")
+    coordinates = np.array([source[n] for n in ['xt','yt','zt']]).T
+    intensities = source['source']
+    
+    voxelization_parameter = dict(
+          shape = io.shape(annotation_file), 
+          dtype = None, 
+          weights = None,
+          method = 'sphere', 
+          radius = (3,3,3), 
+          kernel = None, 
+          processes = 16, 
+          verbose = True
+          )
+
+    vox.voxelize(coordinates, sink=ws.filename('density', postfix='counts'), **voxelization_parameter)
+
+    # Obtain and export region-specific detection results
     print("\nProcessing cell count results and registering annotation files...\n")
     
-    # Obtain and export region-specific detection results
     num_regions, region_names, region_acronyms, region_ids, region_parent_ids, region_children = get_region_info(os.path.join(clearmap_path, 'ClearMap/Resources/Atlas/annotations_reform.json'))
-
+    
     register_annotation(directory, annotation_file)
     
     region_counts, region_volumes, region_densities = get_region_stats(num_regions, directory, region_ids, region_parent_ids, [25,25,25])
@@ -634,11 +619,9 @@ if __name__ == "__main__":
     
     export_regions(num_regions, region_names, region_acronyms, region_ids, region_parent_ids, region_children, region_volumes, region_counts, region_densities, directory)
 
-    # os.remove(ws.filename('stitched'))
-    os.remove(ws.filename('cells', postfix='raw'))
-    # os.remove(ws.filename('cells', postfix='filtered'))
+    if os.path.exists(ws.filename('cells', postfix='raw')):
+        os.remove(ws.filename('cells', postfix='raw'))
 
-    files_to_move = ['cells.csv', yml_file, 'region_data.mat', 'regions.csv']
-    move_files(directory, files_to_move)
+    move_files(directory, ['cells.csv', yml_file, 'region_data.mat', 'regions.csv', 'density_counts.tif'])
     
     print("CellMap Pipeline Complete!")

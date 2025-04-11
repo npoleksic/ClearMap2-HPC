@@ -5,6 +5,7 @@ autof_data_path: 'FT1_autof.npy' # relative path to autofluorescence data from t
 file_type: 'npy' # 'npy', 'tiff', or 'tiff_folder'
 # NOTE: generalize image file names with tag (i.e. Z<Z,4> instead of Z0001, Z0002, etc.)
 
+save_crop: false
 save_preprocessing: false
 skip_registration: true
 skip_detection: false

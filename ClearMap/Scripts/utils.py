@@ -518,6 +518,9 @@ def move_files(directory, files):
     
     for file in files:
         file_path = os.path.join(directory, file)
+        if not os.path.exists(file_path):
+            print(f"Error moving '{file}': File does not appear in the target directory.")
+            continue
         try:
             shutil.move(file_path, destination)
             print(f"Moved {file} to {destination}")
