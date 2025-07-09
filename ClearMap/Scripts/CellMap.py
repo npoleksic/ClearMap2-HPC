@@ -357,7 +357,6 @@ if __name__ == "__main__":
 
     preprocessed_data = os.path.join(directory, 'cfos_preproc.npy')
 
-    
     if not os.path.exists(preprocessed_data):
         print("Pre-processing images...")
         new_cfos, m_thresh, s_thresh = preproc(ws.source('raw'), processes=32, thresholding=auto_thresh, maxima_threshold=m_thresh, shape_threshold=s_thresh)        
@@ -545,7 +544,6 @@ if __name__ == "__main__":
                            thresholds=thresholds); 
 
 
-    
     print("\nMapping detected cells to brain regions...\n")
     
     source = ws.source('cells', postfix='filtered')
