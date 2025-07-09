@@ -85,6 +85,8 @@ print("ClearMap.ImageProcessing.Filter.StructureElement Imported")
 import ClearMap.ImageProcessing.Differentiation as dif
 print("ClearMap.ImageProcessing.Differentiation Imported")
 
+import ClearMap.ImageProcessing.LocalStatistics as ls
+print("ClearMap.ImageProcessing.LocalStatistics Imported")
 #analysis
 import ClearMap.Analysis.Graphs.GraphGt as grp
 print("ClearMap.Analysis.Graphs.GraphGt Imported")
@@ -101,6 +103,9 @@ print("ClearMap.Analysis.Measurements.MeasureRadius Imported")
 import ClearMap.Analysis.Measurements.Voxelization as vox
 print("ClearMap.Analysis.Measurements.Voxelization Imported")
 
+
+
+
 # experts
 # import ClearMap.ImageProcessing.Experts.Vasculature as vasc
 import ClearMap.ImageProcessing.Experts.Cells as cells
@@ -113,5 +118,5 @@ print("Environment import complete")
 __all__ = ['sys', 'os', 'glob', 'np', 'plt', 'reload',
            'settings', 'io', 'wsp', 'tfs', 'col', 'te', 
            'tmr', 'bp', 'ap', 'ano', 'res', 'elx', 'clp', 
-           'rnk', 'se', 'dif', 'grp', 'gp', 'me', 'mr', 
-           'vox', 'cells'];
+           'rnk', 'se', 'dif', 'ls', 'grp', 'gp', 'me', 
+           'mr', 'vox', 'cells'];

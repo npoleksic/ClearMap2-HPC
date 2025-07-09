@@ -7,6 +7,7 @@ import json
 import pandas as pd
 from scipy.io import savemat
 from scipy.spatial import cKDTree
+from skimage.filters import threshold_triangle
 import shutil 
 import os 
 import tifffile as tiff
@@ -14,6 +15,7 @@ import datetime
 import numpy as np
 import cv2
 from PIL import Image
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 def checkpoint():
     
@@ -49,8 +51,64 @@ def read_config(path):
     except yaml.YAMLError as exc:
         print("ERROR: YAML PARSING FAILED", exc)
         return None
+
+
+
+def process_slice(z, z_slice):
+    tmp = z_slice - np.minimum(z_slice, cv2.GaussianBlur(z_slice, (0,0), 10))
+    tmp = cv2.morphologyEx(tmp, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3)))
+    return z, tmp
+
+
+
+def compute_thresh(z, z_slice):
+    return z, threshold_triangle(z_slice)
+
+
+
+def preproc(source, processes=32, thresholding=True, maxima_threshold=None, shape_threshold=None):
+    t_bounds = np.empty((3,2), dtype=int)
+    
+    for d in range(3):
+        t_bounds[d, 0] = int(source.shape[d] * 0.125)
+        t_bounds[d, 1] = int(source.shape[d] * 0.875)
         
+    thresh_vals = np.full(source.shape[2], np.nan, dtype=source.dtype)
+    new_cfos = np.empty(source.shape, dtype=source.dtype)
+
+    with ProcessPoolExecutor(max_workers=processes) as exe:
+        futures = {
+            exe.submit(process_slice, z, source[:,:,z]): z
+            for z in range(source.shape[2])
+        }
         
+        for fut in as_completed(futures):
+            z, processed = fut.result()
+            new_cfos[:,:,z] = processed
+            print(f"Filtered slice {z + 1} of {new_cfos.shape[2]}")
+
+    if thresholding:
+        with ProcessPoolExecutor(max_workers=processes) as exe:
+            futures = {
+                exe.submit(compute_thresh, z, new_cfos[t_bounds[0,0]:t_bounds[0,1], t_bounds[1,0]:t_bounds[1,1], z]): z
+                for z in range(t_bounds[2,0], t_bounds[2,1])
+            }
+            
+            for fut in as_completed(futures):
+                z, thresh = fut.result()
+                thresh_vals[z] = thresh
+                print(f"Slice {z + 1}/{new_cfos.shape[2]} - Triangle threshold: {thresh}")
+
+        thresh_vals = thresh_vals[~np.isnan(thresh_vals)]
+        median_thresh = np.median(thresh_vals)
+        shape_threshold = median_thresh * 1.5
+        maxima_threshold = median_thresh * 2
+        print(f"Automatically assigning thresholds\nNew maxima threshold: {maxima_threshold}\nNew shape threshold {shape_threshold}")
+
+    return new_cfos, maxima_threshold, shape_threshold
+
+
+    
 def remove_overlap(source, filter_distance_min):
     
     """Removes overlapping cells after detection.

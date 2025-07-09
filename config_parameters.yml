@@ -9,14 +9,15 @@ save_crop: false
 save_preprocessing: false
 skip_registration: true
 skip_detection: false
+auto_thresh: true
 
 # RESOLUTION
 raw_x_resolution: 2.002 #resolution of the raw data in the x-direction
 raw_y_resolution: 2.002 # resolution of the raw data in the y-direction
-raw_z_resolution: 3 # resolution of the raw data in the z-direction
+raw_z_resolution: 2 # resolution of the raw data in the z-direction
 autof_x_resolution: 2.002 # resolution of the autofluorescence data in the x-direction
 autof_y_resolution: 2.002 # resolution of the autofluorescence data in the y-direction
-autof_z_resolution: 3 # resolution of the autofluorescence data in the z-direction
+autof_z_resolution: 2 # resolution of the autofluorescence data in the z-direction
 
 # ATLAS SETUP
 # NOTE: to improve performance, ensure the following parameters closely align with the experimental data

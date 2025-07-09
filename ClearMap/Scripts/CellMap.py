@@ -31,7 +31,7 @@ if __name__ == "__main__":
     
     # Import supplementary ClearMap modules
     from ClearMap.Environment import *
-    yml_file = 'config_parameters_ga2.yml'
+    yml_file = 'config_parameters_gd2.yml'
     
     # Read parameters from YML file
     config = read_config(yml_file)
@@ -77,6 +77,7 @@ if __name__ == "__main__":
         save_preproc = config.get('save_preprocessing')
         skip_registration = config.get('skip_registration')
         skip_detection = config.get('skip_detection')
+        auto_thresh = config.get('auto_thresh')
         
         raw_x_res = config.get('raw_x_resolution')
         raw_y_res = config.get('raw_y_resolution')
@@ -355,16 +356,12 @@ if __name__ == "__main__":
     ws.update(raw='cfos.npy', autofluorescence='autof.npy', stitched='cfos.npy')
 
     preprocessed_data = os.path.join(directory, 'cfos_preproc.npy')
+
     
     if not os.path.exists(preprocessed_data):
         print("Pre-processing images...")
-        new_cfos = np.empty(ws.source('raw').shape, dtype=ws.source('raw').dtype)
-        kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3));
-        for z in range(new_cfos.shape[2]):
-            new_cfos[:,:,z] = ws.source('raw')[:,:,z] - np.minimum(ws.source('raw')[:,:,z], cv2.GaussianBlur(ws.source('raw')[:,:,z], (0,0), 10));
-            new_cfos[:,:,z] = cv2.morphologyEx(new_cfos[:,:,z], cv2.MORPH_OPEN, kernel);
-            print(f"Filtered slice: {z}")
-
+        new_cfos, m_thresh, s_thresh = preproc(ws.source('raw'), processes=32, thresholding=auto_thresh, maxima_threshold=m_thresh, shape_threshold=s_thresh)        
+        
         print("Pre-processing finished, writing new array file...")
         io.convert(new_cfos, preprocessed_data, processes=32, verbose=True)
         print("Done.")
@@ -528,7 +525,7 @@ if __name__ == "__main__":
         cells.detect_cells(ws.filename('stitched'), ws.filename('cells', postfix='raw'),
                            cell_detection_parameter=cell_detection_parameter, 
                            processing_parameter=processing_parameter)  
-        
+            
         if checkpoints:
             print("\nCell detection complete!")
             checkpoint()        
@@ -547,13 +544,19 @@ if __name__ == "__main__":
                            sink = ws.filename('cells', postfix='filtered'), 
                            thresholds=thresholds); 
 
+
+    
     print("\nMapping detected cells to brain regions...\n")
     
     source = ws.source('cells', postfix='filtered')
     coordinates = np.array([source[c] for c in 'xyz']).T
 
     coordinates_transformed = transformation(coordinates, align_channel_outdir, align_reference_outdir, workspace=ws)
-   
+    
+    for f in [cfos_file, autof_file, preprocessed_data]:
+        if os.path.exists(f):
+            os.remove(f)
+    
     # Annotate cells based on position in annotation image
     print("\nLabeling cells...\n")
     label = ano.label_points(coordinates_transformed, key='order', annotation_file=annotation_file)
@@ -622,6 +625,9 @@ if __name__ == "__main__":
     if os.path.exists(ws.filename('cells', postfix='raw')):
         os.remove(ws.filename('cells', postfix='raw'))
 
-    move_files(directory, ['cells.csv', yml_file, 'region_data.mat', 'regions.csv', 'density_counts.tif'])
-    
+    with open(os.path.join(directory, 'thresholds.txt'), "w") as f:
+        f.write(f"Maxima detection threshold: {m_thresh}\nShape detection threshold: {s_thresh}\n")
+        
+    move_files(directory, ['cells.csv', yml_file, 'region_data.mat', 'regions.csv', 'density_counts.tif', 'thresholds.txt'])
+
     print("CellMap Pipeline Complete!")
