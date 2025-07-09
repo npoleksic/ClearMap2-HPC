@@ -54,50 +54,62 @@ def read_config(path):
 
 
 
-def process_slice(z, z_slice):
+def process_slice(z, z_slice, thresholding, t_bounds):
     tmp = z_slice - np.minimum(z_slice, cv2.GaussianBlur(z_slice, (0,0), 10))
     tmp = cv2.morphologyEx(tmp, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3)))
-    return z, tmp
+    
+    thresh = np.nan
+    
+    if thresholding:
+        xmin, xmax, ymin, ymax, zmin, zmax = t_bounds.flatten()
+        if (zmin <= z <= zmax):
+            thresh = threshold_triangle(tmp[xmin:xmax, ymin:ymax])
+    
+    return z, tmp, thresh
 
 
 
-def compute_thresh(z, z_slice):
-    return z, threshold_triangle(z_slice)
+# def compute_thresh(z, z_slice):
+#     return z, threshold_triangle(z_slice)
 
 
 
 def preproc(source, processes=32, thresholding=True, maxima_threshold=None, shape_threshold=None):
-    t_bounds = np.empty((3,2), dtype=int)
+    t_bounds = np.zeros((3,2), dtype=int)
     
     for d in range(3):
         t_bounds[d, 0] = int(source.shape[d] * 0.125)
         t_bounds[d, 1] = int(source.shape[d] * 0.875)
         
-    thresh_vals = np.full(source.shape[2], np.nan, dtype=source.dtype)
+    thresh_vals = np.full(source.shape[2], np.nan)
     new_cfos = np.empty(source.shape, dtype=source.dtype)
 
     with ProcessPoolExecutor(max_workers=processes) as exe:
         futures = {
-            exe.submit(process_slice, z, source[:,:,z]): z
+            exe.submit(process_slice, z, source[:,:,z], thresholding, t_bounds): z
             for z in range(source.shape[2])
         }
         
         for fut in as_completed(futures):
-            z, processed = fut.result()
+            z, processed, thresh = fut.result()
             new_cfos[:,:,z] = processed
-            print(f"Filtered slice {z + 1} of {new_cfos.shape[2]}")
+            thresh_vals[z] = thresh
+            if np.isnan(thresh):
+                print(f"Processed slice {z + 1}/{new_cfos.shape[2]}")
+            else:
+                print(f"Processed slice {z + 1}/{new_cfos.shape[2]} [AUTO-THRESH: {thresh}]")
 
-    if thresholding:
-        with ProcessPoolExecutor(max_workers=processes) as exe:
-            futures = {
-                exe.submit(compute_thresh, z, new_cfos[t_bounds[0,0]:t_bounds[0,1], t_bounds[1,0]:t_bounds[1,1], z]): z
-                for z in range(t_bounds[2,0], t_bounds[2,1])
-            }
+    # if thresholding:
+    #     with ProcessPoolExecutor(max_workers=processes) as exe:
+    #         futures = {
+    #             exe.submit(compute_thresh, z, new_cfos[t_bounds[0,0]:t_bounds[0,1], t_bounds[1,0]:t_bounds[1,1], z]): z
+    #             for z in range(t_bounds[2,0], t_bounds[2,1])
+    #         }
             
-            for fut in as_completed(futures):
-                z, thresh = fut.result()
-                thresh_vals[z] = thresh
-                print(f"Slice {z + 1}/{new_cfos.shape[2]} - Triangle threshold: {thresh}")
+    #         for fut in as_completed(futures):
+    #             z, thresh = fut.result()
+    #             thresh_vals[z] = thresh
+    #             print(f"Slice {z + 1}/{new_cfos.shape[2]} - Triangle threshold: {thresh}")
 
         thresh_vals = thresh_vals[~np.isnan(thresh_vals)]
         median_thresh = np.median(thresh_vals)

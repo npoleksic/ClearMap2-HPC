@@ -31,7 +31,7 @@ if __name__ == "__main__":
     
     # Import supplementary ClearMap modules
     from ClearMap.Environment import *
-    yml_file = 'config_parameters_gd2.yml'
+    yml_file = 'config_parameters_ga2.yml'
     
     # Read parameters from YML file
     config = read_config(yml_file)
