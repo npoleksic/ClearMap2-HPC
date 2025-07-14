@@ -58,12 +58,13 @@ def process_slice(z, z_slice, thresholding, t_bounds):
     tmp = z_slice - np.minimum(z_slice, cv2.GaussianBlur(z_slice, (0,0), 10))
     tmp = cv2.morphologyEx(tmp, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3)))
     
-    thresh = np.nan
-    
     if thresholding:
         xmin, xmax, ymin, ymax, zmin, zmax = t_bounds.flatten()
         if (zmin <= z <= zmax):
+        # if True:
             thresh = threshold_triangle(tmp[xmin:xmax, ymin:ymax])
+        else:
+            thresh = np.nan
     
     return z, tmp, thresh
 
@@ -80,7 +81,7 @@ def preproc(source, processes=32, thresholding=True, maxima_threshold=None, shap
     for d in range(3):
         t_bounds[d, 0] = int(source.shape[d] * 0.125)
         t_bounds[d, 1] = int(source.shape[d] * 0.875)
-        
+
     thresh_vals = np.full(source.shape[2], np.nan)
     new_cfos = np.empty(source.shape, dtype=source.dtype)
 
@@ -113,8 +114,8 @@ def preproc(source, processes=32, thresholding=True, maxima_threshold=None, shap
 
         thresh_vals = thresh_vals[~np.isnan(thresh_vals)]
         median_thresh = np.median(thresh_vals)
-        shape_threshold = median_thresh * 1.5
-        maxima_threshold = median_thresh * 2
+        shape_threshold = median_thresh * 1.5 # Try *1
+        maxima_threshold = median_thresh * 2 # Try *1.8
         print(f"Automatically assigning thresholds\nNew maxima threshold: {maxima_threshold}\nNew shape threshold {shape_threshold}")
 
     return new_cfos, maxima_threshold, shape_threshold
