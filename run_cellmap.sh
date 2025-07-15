@@ -12,21 +12,22 @@ echo "The script will perform the following processes:"
 echo -e "\t - Create and activate a CellMap-specific conda environment"
 echo -e "\t - Import required pipeline modules"
 echo -e "\t - Execute the full CellMap pipeline which will:"
+echo -e "\t\t - Pre-process the raw data to isolate individual cells"
 echo -e "\t\t - Align the data channels with a reference brain atlas"
 echo -e "\t\t - Detect, filter, align and annotate cells"
 echo -e "\t\t - Perform voxelization and cell density analysis"
 echo -e "\t\t - Export all results to the provided experimental directory\n"
 
 echo "Useful links:"
-echo -e "\t - ClearMap2 Source Code - github.com/ChristophKirst/ClearMap2/"
-echo -e "\t - ClearMap2 Documentation - christophkirst.github.io/ClearMap2Documentation/"
+echo -e "\t - ClearMap2 Source Code - https://github.com/ClearAnatomics/ClearMap"
+echo -e "\t - ClearMap2 Documentation - https://clearanatomics.github.io/ClearMapDocumentation"
 echo -e "\t - ClearMap Tutorial [VIDEO] - https://youtu.be/-WehURPyIa8\n"
 
 echo "VERIFY BEFORE RUNNING THE PIPELINE:"
 echo -e "\t - Experimental directory contains only two folders (for raw and autof data)"
 echo -e "\t - Experimental directory is in an LSS drive or other large storage disk"
 echo -e "\t\t - CellMap can write 100+ GB of data to your experimental directory"
-echo -e "\t - Experimental data is cropped to remove excess empty space\n"
+echo -e "\t - Experimental data is cropped to remove excess empty space if necessary\n"
 
 read -r -p "Would you like to proceed with the CellMap pipeline? ([y]/n): " response
 if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]

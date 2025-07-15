@@ -1,31 +1,33 @@
 # PATHS
 experiment_path: '/home/npoleksic/LSS/ncb-core/users/npoleksic/FT1' # absolute path to the experimental data folder
-raw_data_path: 'FT1_cfos.npy' # relative path to the raw data from the experimental data folder
-autof_data_path: 'FT1_autof.npy' # relative path to autofluorescence data from the experimental data folder 
-file_type: 'npy' # 'npy', 'tiff', or 'tiff_folder'
+raw_data_path: 'lightsheet_scan/cfos_<Z,4>.tif' # relative path to the raw data from the experimental data folder
+autof_data_path: 'lightsheet_scan/autof_<Z,4>.tif' # relative path to autofluorescence data from the experimental data folder 
+file_type: 'tiff_folder' # 'npy', 'tiff', or 'tiff_folder'
 # NOTE: generalize image file names with tag (i.e. Z<Z,4> instead of Z0001, Z0002, etc.)
 
 save_crop: false
 save_preprocessing: false
-skip_registration: true
+skip_registration: false
 skip_detection: false
 auto_thresh: true
 
 # RESOLUTION
-raw_x_resolution: 2.002 #resolution of the raw data in the x-direction
-raw_y_resolution: 2.002 # resolution of the raw data in the y-direction
+raw_x_resolution: 2.1667 #resolution of the raw data in the x-direction
+raw_y_resolution: 2.1667 # resolution of the raw data in the y-direction
 raw_z_resolution: 2 # resolution of the raw data in the z-direction
-autof_x_resolution: 2.002 # resolution of the autofluorescence data in the x-direction
-autof_y_resolution: 2.002 # resolution of the autofluorescence data in the y-direction
+autof_x_resolution: 2.1667 # resolution of the autofluorescence data in the x-direction
+autof_y_resolution: 2.1667 # resolution of the autofluorescence data in the y-direction
 autof_z_resolution: 2 # resolution of the autofluorescence data in the z-direction
 
 # ATLAS SETUP
 # NOTE: to improve performance, ensure the following parameters closely align with the experimental data
-x_orientation: 1 # atlas axis that matches experimental data x-axis
-y_orientation: 3 # atlas axis that matches experimental data y-axis
-z_orientation: 2 # atlas axis that matches experimental data z-axis
+x_orientation: 3 # atlas axis that matches experimental data x-axis
+y_orientation: -2 # atlas axis that matches experimental data y-axis
+z_orientation: 1 # atlas axis that matches experimental data z-axis
 # NOTE: orientations should be expressed as a 1, 2, or 3 corresponding to axes x, y, and z
 
+
+# CROPPING
 raw_x_min: 0 # minimum crop in x-direction 
 raw_x_max: 'MAX' # maximum crop in x-direction
 raw_y_min: 0 # minimum crop in y-direction
@@ -57,7 +59,7 @@ illumination_correction_background: false # array, string, or false
 illumination_correction_scaling: 'max' # float, 'max', 'mean', or false
 illumination_correction_save: false # true or false
 
-background_correction: true # true or false
+background_correction: false # true or false
 background_correction_shape: [19,19] # 2-element array or false
 background_correction_form: 'Disk' # 'Disk', 'Sphere', 'Cube', or false
 background_correction_save: false # true or false
@@ -94,8 +96,8 @@ intensity_detection_measure: true # true or false
 
 # MISC
 filter_size_min: 10 # minimum cell size to be counted
-filter_size_max: 15000 # maximum cell size to be counted
+filter_size_max: "MAX" # maximum cell size to be counted
 filter_intensity_min: 0 # minimum cell intensity to be counted
-filter_intensity_max: 20000 # maximum cell intensity to be counted
-filter_distance_min: 3 # minimum pixel distance cells should be from each other
+filter_intensity_max: "MAX" # maximum cell intensity to be counted
+filter_distance_min: 5 # minimum pixel distance cells should be from each other
 include_checkpoints: false # check progress during execution
