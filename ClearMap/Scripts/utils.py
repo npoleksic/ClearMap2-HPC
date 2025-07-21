@@ -61,17 +61,11 @@ def process_slice(z, z_slice, thresholding, t_bounds):
     if thresholding:
         xmin, xmax, ymin, ymax, zmin, zmax = t_bounds.flatten()
         if (zmin <= z <= zmax):
-        # if True:
             thresh = threshold_triangle(tmp[xmin:xmax, ymin:ymax])
         else:
             thresh = np.nan
     
     return z, tmp, thresh
-
-
-
-# def compute_thresh(z, z_slice):
-#     return z, threshold_triangle(z_slice)
 
 
 
@@ -99,18 +93,6 @@ def preproc(source, processes=32, thresholding=True, maxima_threshold=None, shap
                 print(f"Processed slice {z + 1}/{new_cfos.shape[2]}")
             else:
                 print(f"Processed slice {z + 1}/{new_cfos.shape[2]} [AUTO-THRESH: {thresh}]")
-
-    # if thresholding:
-    #     with ProcessPoolExecutor(max_workers=processes) as exe:
-    #         futures = {
-    #             exe.submit(compute_thresh, z, new_cfos[t_bounds[0,0]:t_bounds[0,1], t_bounds[1,0]:t_bounds[1,1], z]): z
-    #             for z in range(t_bounds[2,0], t_bounds[2,1])
-    #         }
-            
-    #         for fut in as_completed(futures):
-    #             z, thresh = fut.result()
-    #             thresh_vals[z] = thresh
-    #             print(f"Slice {z + 1}/{new_cfos.shape[2]} - Triangle threshold: {thresh}")
 
         thresh_vals = thresh_vals[~np.isnan(thresh_vals)]
         median_thresh = np.median(thresh_vals)
@@ -489,98 +471,8 @@ def get_region_info(json_path):
         region_children[i] = region_names[region_parent_ids == region_ids[i]]
 
     return num_regions, region_names, region_acronyms, region_ids, region_parent_ids, region_children
-    
-    
 
-def upscale(directory, source_file, target_shape_file, output_file):
 
-    """Upscales atlas images to match experimental data size
-    
-    Arguments
-    ---------
-        directory : String
-            Path to experimental data directory
-            
-        source_file : String
-            Path to image to be upscaled
-            
-        target_shape_file : String
-            Path to image with the target shape
-            
-        output_file : String
-            Filename for output image
-
-    Returns
-    -------
-        target_rot : array
-            Upscaled image data
-    """
-    
-    # Initialization - set parameters
-    source_mm = tiff.imread(source_file) 
-    src_x, src_y, src_z = source_mm.shape[2], \
-                          source_mm.shape[1], \
-                          source_mm.shape[0] # define the source resolution out of the source annotation file
-
-    if len(target_shape_file) != 0: # define the resolution for the target file either manuel or match a target file so the annotation can be used as overlay  
-        target_image        = tiff.imread(os.path.join(directory, target_shape_file))
-        tar_x, tar_y, tar_z = target_image.shape[2], target_image.shape[1], target_image.shape[0]
-        del target_image, target_shape_file
-    else:
-        tar_x, tar_y, tar_z = src_x*2, src_y*2, src_z*2 #matching resolution
-
-    # 1. STEP: upscale x,y direction and hold z stable
-    starttime = datetime.datetime.now()
-    target_file = os.path.join(directory, "anno_upscaled_to_stitched.npy")
-    target_mm = np.memmap(target_file, dtype="float32", mode="w+", shape=(src_z,tar_y,tar_x)) # create the final upscale file (just reserves the space on HDD)
-
-    for i in range(source_mm.shape[0]):
-        slice = np.array(Image.fromarray(source_mm[i]).resize((tar_x, tar_y), Image.NEAREST))
-        target_mm[i] = slice
-        target_mm.flush()
-        if i!=0 and (round(i/source_mm.shape[0],2)*100)%10 == 0: 
-            print(f"slice {i} of {len(source_mm[:,:,0])} ({round(i*100/source_mm.shape[0],1)}%)")
-
-    print(f"S1 x,y upscale done: {len(source_mm[:,:,0])} slices upscaled in {datetime.datetime.now()-starttime}")
-
-    # 2. STEP: upscale z direction and hold xy stable
-    source_file = os.path.join(directory, "anno_upscaled_to_stitched.npy")
-    source_mm = np.memmap(source_file, dtype="float32", mode="r", shape=(src_z,tar_y,tar_x)) # load the source registration file as mm (write protected) [z,y,x]
-    
-    target_file = os.path.join(directory, "anno_upscaled_to_rot-stitched.npy")
-    target_rot = np.memmap(target_file, dtype="float32", mode="w+", shape=(tar_y,tar_z,tar_x)) # create the final upscale file (just reserves the space on HDD)
-
-    source_mm = np.rot90(source_mm, 1, axes=(0,1))
-
-    starttime2 = datetime.datetime.now()
-
-    for i in range(source_mm.shape[0]):
-        slice = np.array(Image.fromarray(source_mm[i]).resize((tar_x,tar_z), Image.NEAREST))
-        target_rot[i] = slice
-        target_rot.flush()
-
-        if i!=0 and (round(i*100/source_mm.shape[0]))%20 == 0: 
-            print(f"slice {i} of {len(source_mm[:,:,0])} ({round(i*100/source_mm.shape[0],1)}%)")
-
-    target_rot = np.rot90(target_rot, -1, axes=(0,1))
-    target_rot.flush()
-
-    print(f"{len(source_mm[:,:,0])} slices upscaled in {datetime.datetime.now()-starttime2}")
-
-    # 3. STEP: convert to tif
-    with tiff.TiffWriter(os.path.join(directory, output_file), bigtiff=True) as tif:
-        for i in range(target_rot.shape[0]):
-            tif.save(target_rot[i], photometric='minisblack') # min-is-black
-            if i!=0 and (round(i*100/source_mm.shape[0]))%20 == 0: 
-                print(f"slice {i} of {target_rot.shape[0]} ({round(i*100/target_rot.shape[0],1)}%)")
-
-    # 4. STEP: delete the working files
-    os.remove(target_file)
-    os.remove(source_file)
-
-    print(f"Full processing time: {datetime.datetime.now()-starttime}")
-    
-    return target_rot
 
 def move_files(directory, files):
     dt = datetime.datetime.now()
