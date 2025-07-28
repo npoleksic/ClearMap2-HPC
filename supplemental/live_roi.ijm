@@ -1,8 +1,8 @@
 open(File.openDialog("Select your cells.csv file"));
 
 prevSlice = -1;
-numCells = getValue("results.count");
-sizeConv = 2/(PI*(4/3)*2.1667*2.1667*2)
+numCells = getValue("results.count"); 
+sizeConv = 2/(PI*(4/3)*2.1667*2.1667*2) // ROI size multiplier 
 
 Dialog.createNonBlocking("Set slice tolerance for displayed ROIs");
 Dialog.addMessage("Note: A higher slice tolerance may increase loading times");
@@ -10,28 +10,28 @@ Dialog.addSlider("# of Slices +/- current slice", 0, 20, 3);
 Dialog.show();
 sliceTolerance = Dialog.getNumber();
 
-while (true){
-	wait(250);
+while (true){ // Loop until macro is aborted
+	wait(250); 
 	currentSlice = getSliceNumber() - 1;
 	
-	if (currentSlice != prevSlice) {
+	if (currentSlice != prevSlice) { // Plot new ROIs if currently viewing new slice
 		
-		if (prevSlice != -1){
+		if (prevSlice != -1){ // Delete current ROIs
 			roiManager("deselect");
 			roiManager("delete");
 		}
 		
-		getDisplayedArea(xWindow, yWindow, wWindow, hWindow);
+		getDisplayedArea(xWindow, yWindow, wWindow, hWindow); // Get current view window to avoid displaying unnecessary ROIs
 		
 		prevSlice = currentSlice;
 		n = 0;
 		
-		for(i = 0; i < numCells; i++){
+		for(i = 0; i < numCells; i++){ // Loop through all cells
 			z = getResult("z", i);
 			
 			sliceDiff = abs(z-currentSlice);
 			
-			if (sliceDiff <= sliceTolerance){
+			if (sliceDiff <= sliceTolerance){ // Draw ROI if cell is detected within slice tolerance 
 				x = getResult("# x", i);
 				
 				if (x >= xWindow && x <= (xWindow + wWindow)) {
@@ -47,18 +47,18 @@ while (true){
 						roiManager("add");
 						roiManager("select", n);
 						roiManager("rename", name);
-						if (z == currentSlice) {
+						if (z == currentSlice) { // Green ROI = detected in current slice.
 							roiManager("Set Color", "#00FF00");
-						} else {
+						} else { // Red ROI = detected within slice tolerance, but not in current slice
 							roiManager("Set Color", "#FF0000");
 						}
 						n++;
 					}
 				}
 			}
-			else if (z > currentSlice + sliceTolerance) {
+			else if (z > currentSlice + sliceTolerance) { 
 				break;
-			}
+			} 
 			
 		}
 		
